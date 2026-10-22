@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Catat dan Hitung</string>
+    <string name="title_activity_main">Catat dan Hitung</string>
+    <string name="package_name">com.catat.hitung</string>
+    <string name="custom_url_scheme">com.catat.hitung</string>
+</resources>

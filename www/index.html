@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover">
+<meta name="theme-color" content="#ffe6f2">
+<title>Catat & Hitung</title>
+
+<link rel="preload" as="image" href="Pink.jpg" fetchpriority="high">
+
+<style>
+/* =====================================================
+   1. BASE / RESET
+   ===================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #40384a;
+  background: #ffe6f2;
+  -webkit-tap-highlight-color: transparent;
+}
+html, body { height: 100% !important; }
+
+/* Background Fixed */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #ffe6f2 url('Pink.jpg') center center / cover no-repeat;
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Anti-Flash & Loading State */
+body.app-loading .content,
+body.app-loading .header { opacity: 0; }
+body:not(.app-loading) .content,
+body:not(.app-loading) .header {
+  transition: opacity .15s ease-out;
+  opacity: 1;
+}
+
+/* =====================================================
+   2. APP LAYOUT
+   ===================================================== */
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  min-height: 100dvh !important;
+  padding-bottom: 160px !important;
+  position: relative;
+  z-index: 2;
+}
+
+/* =====================================================
+   3. HEADER
+   ===================================================== */
+.header {
+  padding: 24px 20px 18px;
+  background: rgba(255,255,255,.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.3);
+  color: #40384a;
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 8px 25px rgba(167,139,250,.15);
+  position: relative;
+}
+.header-content {
+  display: flex;
+  flex-direction: column;
+  padding-right: 40px;
+}
+.header h1 {
+  margin: 0;
+  font-size: 27px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header p {
+  margin: 7px 0 0;
+  opacity: .8;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.backup-love-btn {
+  position: absolute;
+  top: 22px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  outline: none;
+  transition: transform .2s;
+  opacity: .85;
+}
+.backup-love-btn:active { transform: scale(.85); }
+.text-3d {
+  filter: drop-shadow(1px 3px 3px rgba(0,0,0,.2));
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   4. CONTENT & PAGE
+   ===================================================== */
+.content { padding: 18px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* =====================================================
+   5. CARD (Kartu Kaca Global)
+   ===================================================== */
+.card {
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 7px 22px rgba(40,90,100,.06);
+}
+.card h2 { margin: 0 0 6px; font-size: 21px; }
+.card p { color: #5d5566; font-size: 14px; }
+
+#saving .card, #journal .card, #cash .card {
+  padding: 18px !important;
+  margin-bottom: 16px !important;
+  border-radius: 22px !important;
+}
+#saving .card h2, #journal .card h2, #cash .card h2 {
+  font-size: 21px !important;
+  margin-bottom: 6px !important;
+}
+#saving .card p, #journal .card p, #cash .card p {
+  font-size: 14px !important;
+  margin: 0 0 10px 0 !important;
+}
+
+/* =====================================================
+   6. HOME — MENU GRID
+   ===================================================== */
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+  margin-top: 16px;
+}
+.menu {
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 22px;
+  padding: 20px 10px;
+  min-height: 125px;
+  box-shadow: 0 7px 20px rgba(40,90,100,.05), inset 0 1px 0 rgba(255,255,255,.2);
+  font-size: 15px;
+  font-weight: bold;
+  color: #315749;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.menu:active { transform: scale(.97); }
+.icon { display: block; font-size: 38px; margin-bottom: 10px; }
+
+/* =====================================================
+   7. FORM & INPUT
+   ===================================================== */
+.input-group { margin-bottom: 14px; }
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 7px;
+  color: #62576d;
+}
+input, select, textarea {
+  width: 100%;
+  border: 2px solid rgba(238,229,243,.7);
+  border-radius: 14px;
+  padding: 13px;
+  font-size: 16px;
+  outline: none;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #40384a;
+}
+input:focus, select:focus, textarea:focus { border-color: #d59bea; }
+textarea { min-height: 90px; resize: vertical; }
+
+.money-input { position: relative; }
+.money-input .rp {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: #a05ac8;
+  z-index: 2;
+}
+.money-input input { padding-left: 43px; }
+
+.btn {
+  width: 100%;
+  border: 0;
+  border-radius: 15px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg,#ff7eb3,#a78bfa);
+  cursor: pointer;
+  margin-top: 6px;
+}
+.btn:active { transform: scale(.98); }
+
+.result {
+  background: linear-gradient(135deg,rgba(255,240,247,.85),rgba(241,237,255,.85));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 18px;
+  padding: 18px;
+  margin-top: 15px;
+  text-align: center;
+}
+.result .big { font-size: 27px; font-weight: bold; color: #a05ac8; }
+.result p { margin: 6px 0; }
+.hidden { display: none !important; }
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.mode-btn {
+  border: 2px solid rgba(238,229,243,.8);
+  background: rgba(255,255,255,.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 13px;
+  border-radius: 15px;
+  font-weight: bold;
+  color: #685d72;
+}
+.mode-btn.active {
+  border-color: #dc8ebd;
+  background: rgba(255,240,247,.85);
+  color: #c14d88;
+}
+
+/* =====================================================
+   8. PERSON CARD (Split Bill)
+   ===================================================== */
+.person-card {
+  border: 2px solid rgba(240,229,243,.8);
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 12px;
+  background: rgba(255,250,253,.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.person-title {
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #8d4f91;
+}
+
+/* =====================================================
+   9. TRANSAKSI & RIWAYAT
+   ===================================================== */
+.transaction {
+  padding: 13px;
+  border-radius: 15px;
+  background: rgba(250,248,252,.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.3);
+  margin-top: 9px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.transaction .info { flex: 1; min-width: 0; }
+.transaction .title { font-weight: bold; overflow-wrap: anywhere; }
+.transaction small { color: #8a808f; }
+.transaction .amount {
+  flex: 0 1 40%;
+  min-width: 0;
+  max-width: 40%;
+  font-weight: bold;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: right;
+}
+.amount.in  { color: #35a66b; }
+.amount.out { color: #e55f82; }
+.delete {
+  flex: 0 0 36px;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  border: 0;
+  background: rgba(255,232,239,.8);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  z-index: 5;
+  cursor: pointer;
+}
+.empty { text-align: center; color: #9a909f; padding: 20px 5px; }
+
+/* =====================================================
+   10. TABUNGAN IMPIAN (Goal)
+   ===================================================== */
+.goal-card {
+  background: linear-gradient(135deg,rgba(255,247,251,.75),rgba(247,242,255,.75));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(240,229,243,.7);
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.goal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.goal-name { font-size: 18px; font-weight: bold; color: #8d4f91; }
+.goal-target { margin-top: 5px; font-size: 13px; color: #81758b; }
+.progress-wrap { margin-top: 14px; }
+.progress-bar {
+  height: 13px;
+  width: 100%;
+  background: rgba(238,230,244,.7);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#ff8fbd,#a78bfa);
+  border-radius: 20px;
+}
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.goal-money {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 13px;
+}
+.goal-money-box {
+  background: rgba(255,255,255,.7);
+  padding: 11px;
+  border-radius: 14px;
+  text-align: center;
+}
+.goal-money-box small { display: block; color: #81758b; margin-bottom: 4px; }
+.goal-money-box strong { color: #9a62c7; font-size: 14px; }
+.goal-info {
+  margin-top: 10px;
+  background: rgba(255,248,217,.85);
+  border-radius: 13px;
+  padding: 10px;
+  font-size: 12px;
+  color: #75663d;
+}
+.goal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.goal-add, .goal-delete {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px;
+  font-weight: bold;
+}
+.goal-add    { background: rgba(255,240,247,.85); color: #c04d87; }
+.goal-delete { background: rgba(255,232,239,.85); color: #d65b7d; }
+.goal-complete {
+  margin-top: 10px;
+  text-align: center;
+  background: rgba(234,255,242,.85);
+  color: #36a76b;
+  border-radius: 12px;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.list-row {
+  padding: 13px;
+  border-radius: 15px;
+  background: rgba(250,248,252,.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.3);
+  margin-top: 9px;
+}
+.muted { color: #8a808f; font-size: 12px; }
+
+/* =====================================================
+   11. BOTTOM NAV
+   ===================================================== */
+.bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  transform: translateZ(0) !important;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 5px calc(10px + env(safe-area-inset-bottom)) !important;
+  z-index: 9999 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: transform .3s ease, opacity .3s ease;
+  visibility: hidden;
+}
+.bottom-nav.ready { visibility: visible; }
+.bottom-nav.keyboard-open { display: none !important; }
+
+.nav-btn {
+  flex: 1;
+  max-width: 110px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.nav-btn .nav-icon {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
+  opacity: .85;
+  filter: contrast(1.05) saturate(1.1) drop-shadow(0 2px 2px rgba(0,0,0,.3));
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), filter .3s ease;
+}
+.nav-btn:active .nav-icon { transform: scale(.85); }
+.nav-btn.active .nav-icon {
+  opacity: 1;
+  transform: scale(1.15);
+  filter: contrast(1.1) saturate(1.2) brightness(1.05)
+          drop-shadow(0 4px 3px rgba(0,0,0,.35))
+          drop-shadow(0 0 5px rgba(255,255,255,.6));
+}
+
+@media (max-width: 360px) {
+  .nav-btn .nav-icon { font-size: 20px; }
+  .bottom-nav { padding: 6px 4px calc(8px + env(safe-area-inset-bottom)) !important; }
+}
+
+/* =====================================================
+   12. FINANCE (Saldo & Riwayat)
+   ===================================================== */
+.finance-balance {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 25px;
+  padding: 20px 18px 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(150,75,105,.08), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.finance-balance::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18%;
+  width: 64%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(211,163,100,.85),transparent);
+}
+.finance-balance small {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #99677e;
+  margin-bottom: 10px;
+}
+.finance-balance strong {
+  display: block;
+  font-size: clamp(27px,7vw,36px);
+  font-weight: 800;
+  letter-spacing: -.7px;
+  color: #B8865B !important;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  text-shadow: 0 1px 1px rgba(255,255,255,.5);
+}
+
+.finance-history-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.finance-history-tab {
+  border: 2px solid rgba(238,229,243,.8);
+  background: rgba(255,255,255,.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 11px 5px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #685d72;
+  cursor: pointer;
+}
+.finance-history-tab.active {
+  border-color: #dc8ebd;
+  background: rgba(255,240,247,.85);
+  color: #c14d88;
+}
+
+.finance-period {
+  margin-top: 11px;
+  border: 2px solid rgba(240,229,243,.7);
+  border-radius: 17px;
+  background: rgba(255,250,253,.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+.finance-period-head {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  color: #40384a;
+}
+.finance-period-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: bold;
+}
+.finance-period-arrow {
+  font-size: 16px;
+  color: #a05ac8;
+  transition: transform .2s ease;
+}
+.finance-period.open .finance-period-arrow { transform: rotate(180deg); }
+.finance-period-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.finance-period-box {
+  padding: 8px 5px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.7);
+  text-align: center;
+}
+.finance-period-box small { display: block; font-size: 9px; color: #8a808f; margin-bottom: 3px; }
+.finance-period-box strong { display: block; font-size: 11px; word-break: break-word; }
+.finance-period-box.income strong  { color: #39a96b; }
+.finance-period-box.expense strong { color: #ed6587; }
+.finance-period-box.balance strong { color: #8a62d8; }
+.finance-period-body {
+  display: none;
+  padding: 0 12px 12px;
+  border-top: 1px solid rgba(240,229,243,.7);
+}
+.finance-period.open .finance-period-body { display: block; }
+.finance-period-body .transaction { background: rgba(255,255,255,.7); }
+.finance-history-empty { text-align: center; color: #9a909f; padding: 20px 5px; }
+
+/* =====================================================
+   13. CASH TICKETS (Menu Split)
+   ===================================================== */
+.cash-tickets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.cash-ticket {
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 21px;
+  padding: 18px 12px;
+  min-height: 145px;
+  box-shadow: 0 7px 20px rgba(100,70,120,.09);
+  font-size: 15px;
+  font-weight: bold;
+  color: #51465c;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.cash-ticket:active { transform: scale(.97); }
+.cash-ticket-icon { font-size: 38px; display: block; margin-bottom: 9px; }
+.cash-tickets .cash-ticket .cash-ticket-name {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  font-size: 16px;
+  font-weight: bold;
+}
+.cash-ticket-total {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: normal;
+  color: #8a808f;
+  word-break: break-word;
+}
+.cash-ticket-arrow {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  font-size: 18px;
+  color: #a05ac8;
+}
+
+.split-history-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+.split-history-card { margin-top: 12px; padding: 10px 14px; }
+.split-history-title { font-size: 14px; color: #40384a; font-weight: bold; }
+.split-history-icon { font-size: 18px; color: #a05ac8; }
+.split-history-body { margin-top: 12px; }
+
+/* =====================================================
+   14. UNDIAN TRAKTIR + PERSENTASE
+   ===================================================== */
+.trader-wrapper,
+.percent-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 65vh;
+  padding: 10px 0;
+  margin-top: -20px;
+}
+.trader-dice {
+  width: 100px;
+  height: 100px;
+  margin: 15px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 70px;
+  background: linear-gradient(135deg,rgba(255,247,252,.85),rgba(241,236,255,.85));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 28px;
+  box-shadow: 0 8px 20px rgba(140,100,170,.12);
+}
+.trader-dice.shaking { animation: diceShake .12s infinite; }
+@keyframes diceShake {
+  0%   { transform: rotate(-10deg) translate(-3px,1px)  scale(1.02); }
+  25%  { transform: rotate(8deg)   translate(3px,-2px)  scale(1.05); }
+  50%  { transform: rotate(-7deg)  translate(-2px,2px)  scale(1.03); }
+  75%  { transform: rotate(10deg)  translate(2px,-1px)  scale(1.05); }
+  100% { transform: rotate(-10deg) translate(-3px,1px)  scale(1.02); }
+}
+.trader-round {
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #9a62c7;
+  margin-top: 5px;
+}
+.trader-result {
+  margin-top: 15px;
+  padding: 20px 12px;
+  border-radius: 20px;
+  background: linear-gradient(135deg,rgba(255,240,247,.85),rgba(241,237,255,.85));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  text-align: center;
+}
+.trader-result .winner-name {
+  font-size: 26px;
+  font-weight: bold;
+  color: #a05ac8;
+  margin-top: 8px;
+  word-break: break-word;
+}
+.trader-winners { margin-top: 15px; }
+.trader-winner-row {
+  padding: 12px 14px;
+  background: rgba(255,250,253,.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 2px solid rgba(240,229,243,.7);
+  border-radius: 14px;
+  margin-top: 8px;
+  font-weight: bold;
+  color: #6d5879;
+}
+.trader-status { text-align: center; color: #8a808f; font-size: 13px; margin-top: 8px; }
+.trader-draw-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.trader-complete {
+  margin-top: 15px;
+  padding: 14px;
+  border-radius: 15px;
+  background: rgba(234,255,242,.85);
+  color: #36a76b;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* =====================================================
+   15. FOLDS (Lipatan Kartu)
+   ===================================================== */
+.finance-fold-card { overflow: hidden; }
+.finance-fold-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #40384a;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+}
+.finance-fold-header:active { transform: scale(.99); }
+
+#financeInputBody,
+#financeHistoryBody,
+#cashInputBody,
+#cashHistoryBody { padding-top: 14px; }
+
+.goal-fold-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.goal-fold-button .goal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.goal-main-info { min-width: 0; }
+.goal-fold-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 23px;
+  color: #9c6d91;
+}
+.goal-fold-button .progress-wrap { margin-top: 14px; }
+.goal-details {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(190,145,180,.25);
+}
+.goal-saved-summary {
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.35);
+  font-size: 14px;
+}
+.goal-saved-summary strong { color: #9c6d91; }
+.goal-details.hidden { display: none !important; }
+
+.journal-fold-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.journal-fold-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.journal-fold-info { min-width: 0; }
+.journal-fold-title { font-weight: 800; overflow-wrap: anywhere; }
+.journal-fold-icon {
+  flex-shrink: 0;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: #9c6d91;
+}
+.journal-fold-details {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(190,145,180,.25);
+  overflow-wrap: anywhere;
+}
+.journal-fold-details p { white-space: normal; line-height: 1.6; }
+.journal-fold-details.hidden { display: none !important; }
+.journal-fold-details .delete {
+  position: relative !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  margin: 12px 0 0 auto !important;
+  box-sizing: border-box;
+  float: none !important;
+}
+
+.cash-fold-header,
+.saving-fold-header,
+.journal-fold-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #40384a;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+}
+.cash-fold-header:active,
+.saving-fold-header:active,
+.journal-fold-header:active { transform: scale(.99); }
+.fold-body { padding-top: 14px; }
+
+/* =====================================================
+   16. HEMAT COMPACT CARD
+   ===================================================== */
+.hemat-section { margin-bottom: 16px; }
+.hemat-toggle-icon { font-size: 12px; margin-left: 5px; }
+
+.hemat-compact-card {
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 20px;
+  padding: 16px 14px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(150,75,105,.08);
+  margin-bottom: 16px;
+}
+.hemat-content-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.hemat-header-title { font-size: 18px; font-weight: bold; margin: 0 0 4px 0; color: #40384a; }
+.hemat-header-sub   { font-size: 11px; color: #8a808f; margin: 0 0 14px 0; }
+.hemat-label-small  { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #99677e; }
+.hemat-val-medium   { font-size: 20px; font-weight: 800; color: #B8865B; margin-bottom: 2px; }
+.hemat-val-dynamic  { font-size: 13px; font-weight: 600; color: #8a808f; }
+.hemat-sub-dynamic  { font-size: 10px; color: #9a909f; margin-bottom: 6px; }
+.hemat-divider      { width: 80%; height: 1px; background: rgba(190,145,180,.25); margin: 8px 0; }
+.hemat-label-dominant { font-size: 12px; font-weight: 800; letter-spacing: .5px; color: #8d4f91; margin-top: 4px; }
+.hemat-val-dominant {
+  font-size: clamp(32px,8vw,38px);
+  font-weight: 900;
+  color: #a05ac8;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(255,255,255,.55);
+  margin: 2px 0;
+  overflow-wrap: anywhere;
+}
+.hemat-sub-dominant { font-size: 11px; color: #7b5e8a; font-weight: 600; margin-bottom: 4px; }
+
+.hemat-result-header {
+  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.hemat-result-header-text { text-align: left; }
+.hemat-result-toggle-icon { font-size: 20px; color: #a05ac8; }
+.hemat-collapsed-view { text-align: center; padding: 16px 0 8px; }
+.hemat-expanded-view { margin-top: 14px; }
+
+.hemat-today-day {
+  margin-top: 10px;
+  border: 1px solid rgba(230,200,220,.6);
+  border-radius: 14px;
+  background: rgba(255,255,255,.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+.hemat-today-day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6d5879;
+  background: rgba(255,240,247,.55);
+}
+.hemat-today-day-head .hemat-today-total { color: #c14d88; font-size: 13px; }
+.hemat-today-items { padding: 4px 10px 8px; }
+.hemat-today-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px dashed rgba(220,200,220,.5);
+}
+.hemat-today-item:last-child { border-bottom: 0; }
+.hemat-today-item .info { flex: 1; min-width: 0; }
+.hemat-today-item .title { font-weight: 700; font-size: 14px; color: #40384a; overflow-wrap: anywhere; }
+.hemat-today-item small { display: block; margin-top: 2px; font-size: 11px; color: #8a808f; }
+.hemat-today-item .amount {
+  flex: 0 0 auto;
+  font-weight: 800;
+  font-size: 14px;
+  color: #e55f82;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.hemat-divider-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  color: #817688;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 15px;
+}
+.hemat-divider-btn::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  width: 60%;
+  height: 1.5px;
+  background: rgba(255,255,255,.7);
+  border-radius: 2px;
+}
+.hemat-form-body {
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 20px;
+  padding: 16px 14px;
+  box-shadow: 0 8px 24px rgba(150,75,105,.08);
+  margin-bottom: 16px;
+}
+
+/* =====================================================
+   17. SMOOTH MENU CARD
+   ===================================================== */
+.smooth-menu-card {
+  background: rgba(255,255,255,.12) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.35) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  margin-bottom: 16px !important;
+  box-shadow: 0 8px 24px rgba(150,75,105,.05) !important;
+  overflow: hidden;
+}
+.smooth-menu-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+.smooth-menu-btn:active { background: rgba(255,255,255,.3); }
+.smooth-menu-left { display: flex; align-items: center; gap: 15px; }
+.smooth-icon { font-size: 20px; }
+.smooth-title { font-size: 15px; font-weight: 700; color: #40384a; }
+.smooth-arrow { font-size: 14px; color: #a05ac8; transition: transform .3s ease; }
+.smooth-menu-body {
+  padding: 0 20px 20px 20px !important;
+  animation: smoothFadeIn .3s ease;
+}
+@keyframes smoothFadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================
+   18. GPU RENDERING HINTS
+   ===================================================== */
+.header, .card, .menu, .cash-ticket, .finance-balance,
+.smooth-menu-card, .hemat-compact-card,
+.hemat-form-body, .person-card, .trader-dice, .trader-result, .result {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* =====================================================
+   19. MODAL BACKUP
+   ===================================================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  position: relative;
+  animation: popInModal .3s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+@keyframes popInModal {
+  from { opacity: 0; transform: scale(.9) translateY(20px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+.modal-close {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: rgba(0,0,0,.05);
+  border: none;
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:active { background: rgba(0,0,0,.1); }
+.modal-title { margin-top: 0; color: #40384a; text-align: center; }
+.modal-desc {
+  font-size: 13px;
+  color: #8a808f;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.btn-backup {
+  background: linear-gradient(135deg,#4ade80,#22c55e);
+  margin-bottom: 12px;
+  font-size: 14px;
+  padding: 14px;
+}
+.btn-restore {
+  background: linear-gradient(135deg,#a78bfa,#8b5cf6);
+  font-size: 14px;
+  padding: 14px;
+}
+.modal-import-wrap { position: relative; }
+
+/* =====================================================
+   20. SWIPE HINT TOAST (muncul sekali seumur hidup)
+   ===================================================== */
+.swipe-hint {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: 10001;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 12px 18px 12px 14px;
+  border-radius: 16px;
+  background: rgba(64, 56, 74, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(64, 56, 74, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .45s cubic-bezier(.34,1.56,.64,1),
+              opacity .35s ease;
+}
+.swipe-hint.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.swipe-hint-icon {
+  flex-shrink: 0;
+  font-size: 22px;
+  line-height: 1;
+  animation: swipeHintMove 1.4s ease-in-out infinite;
+}
+@keyframes swipeHintMove {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(6px); }
+}
+.swipe-hint-text strong { color: #ffd1e8; }
+</style>
+</head>
+<body class="app-loading">
+<div class="app">
+
+<!-- ==================== HEADER ==================== -->
+<header class="header">
+  <div class="header-content">
+    <h1><span class="text-3d">🌷</span> Catat &amp; Hitung</h1>
+    <p>Hitung lebih mudah, catat lebih rapi <span class="text-3d">💕</span></p>
+  </div>
+  <button class="backup-love-btn" onclick="openBackupModal()" title="Backup Data">❤️</button>
+</header>
+
+<div class="content">
+
+  <!-- ==================== HOME ==================== -->
+  <section id="home" class="page active">
+    <div class="card">
+      <h2>Halo 👋</h2>
+      <p>Pilih yang ingin kamu gunakan hari ini.</p>
+      <div class="menu-grid">
+        <button class="menu" onclick="showPage('split')"><span class="icon">🍰</span>Split Bill</button>
+        <button class="menu" onclick="showPage('discount')"><span class="icon">💸</span>Kalkulator Hemat</button>
+        <button class="menu" onclick="showPage('finance')"><span class="icon">💰</span>Catatan Keuangan</button>
+        <button class="menu" onclick="showPage('saving')"><span class="icon">🌸</span>Tabungan Impian</button>
+        <button class="menu" onclick="showPage('cash')"><span class="icon">👛</span>Uang Kas</button>
+        <button class="menu" onclick="showPage('journal')"><span class="icon">📔</span>Jurnal Harian</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SPLIT BILL ==================== -->
+  <section id="split" class="page">
+    <div id="splitHomeView">
+      <div class="card">
+        <h2>🍰 Split Bill</h2>
+        <p>Pilih cara pembagian tagihan yang kamu mau.</p>
+        <div class="cash-tickets">
+          <button class="cash-ticket" onclick="splitMode('equal')">
+            <span class="cash-ticket-icon">🍽️</span>
+            <div class="cash-ticket-name">Bagi Rata</div>
+            <div class="cash-ticket-total">Semua bayar sama rata</div>
+            <span class="cash-ticket-arrow">→</span>
+          </button>
+          <button class="cash-ticket" onclick="splitMode('weight')">
+            <span class="cash-ticket-icon">⚖️</span>
+            <div class="cash-ticket-name">Timbang Badan</div>
+            <div class="cash-ticket-total">Sesuai Timbangan (berat)</div>
+            <span class="cash-ticket-arrow">→</span>
+          </button>
+          <button class="cash-ticket" onclick="splitMode('trader')">
+            <span class="cash-ticket-icon">🎁</span>
+            <div class="cash-ticket-name">Undi Traktir</div>
+            <div class="cash-ticket-total">Pilih yang traktir</div>
+            <span class="cash-ticket-arrow">→</span>
+          </button>
+          <button class="cash-ticket" onclick="splitMode('percent')">
+            <span class="cash-ticket-icon">📊</span>
+            <div class="cash-ticket-name">Undi Persentase</div>
+            <div class="cash-ticket-total">Undi Persentase secara acak</div>
+            <span class="cash-ticket-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="splitHistoryCard" class="card split-history-card">
+        <button type="button" class="split-history-toggle" onclick="toggleSplitHistory()">
+          <span class="split-history-title">📚 Riwayat Split Bill</span>
+          <span id="splitHistoryIcon" class="split-history-icon">▶</span>
+        </button>
+        <div id="splitHistoryBody" class="hidden split-history-body">
+          <div id="splitHistoryList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="splitDetailView" class="hidden">
+      <div id="splitForm" class="card"></div>
+    </div>
+  </section>
+
+  <!-- ==================== KALKULATOR HEMAT ==================== -->
+  <section id="discount" class="page">
+    <div class="hemat-section">
+      <button type="button" class="hemat-divider-btn" onclick="toggleFinanceCard('hematInputBody','hematInputIcon')">
+        <span>💸 Kelola Keuangan</span>
+        <span id="hematInputIcon" class="hemat-toggle-icon">▼</span>
+      </button>
+
+      <div id="hematInputBody" class="hemat-form-body">
+        <div class="input-group">
+          <label>Saldo / Nominal Awal</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="hematSaldo" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Cara Menentukan Hemat</label>
+          <div class="mode-buttons">
+            <button id="hematModePercentBtn" class="mode-btn active" onclick="setHematMode('percent')">📊 Persen (%)</button>
+            <button id="hematModeNominalBtn" class="mode-btn" onclick="setHematMode('nominal')">💵 Rupiah (Rp)</button>
+          </div>
+        </div>
+
+        <div class="input-group" id="hematPercentWrap">
+          <label>Hemat (%)</label>
+          <input id="hematPercent" type="number" min="0" max="100" step="0.01" placeholder="20">
+        </div>
+
+        <div class="input-group hidden" id="hematNominalWrap">
+          <label>Hemat (Rupiah)</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="hematNominal" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Tanggal Mulai</label>
+          <input id="hematStartDate" type="date">
+        </div>
+
+        <div class="input-group">
+          <label>Tanggal Selesai</label>
+          <input id="hematEndDate" type="date">
+        </div>
+
+        <button class="btn" onclick="startHematTarget()">🎯 Mulai Target Hemat</button>
+      </div>
+    </div>
+
+    <div class="card hidden hemat-compact-card" id="hematResultCard">
+      <button type="button" class="finance-fold-header hemat-result-header" onclick="toggleHematFold()">
+        <div class="hemat-result-header-text">
+          <h2 class="hemat-header-title">📊 Progres Aktif</h2>
+          <p class="hemat-header-sub" id="hematSummaryText">—</p>
+        </div>
+        <span id="hematResultToggleIcon" class="hemat-result-toggle-icon">▼</span>
+      </button>
+
+      <div id="hematCollapsedView" class="hidden hemat-collapsed-view">
+        <div class="hemat-label-dominant">🎯 SISA LIMIT HARIAN</div>
+        <div class="hemat-val-dominant" id="hematDailyBudgetCollapsed">Rp 0</div>
+      </div>
+
+      <div id="hematExpandedView" class="hemat-content-center hemat-expanded-view">
+        <div class="hemat-label-small">SALDO AKTIF</div>
+        <div class="hemat-val-medium" id="hematRemainingValue">Rp 0</div>
+
+        <div class="hemat-val-dynamic" id="hematDynamicCalc">Rp 0</div>
+        <div class="hemat-sub-dynamic">(Akumulasi Harian Bergerak)</div>
+
+        <div class="hemat-divider"></div>
+
+        <div class="hemat-label-dominant">🎯 SISA LIMIT HARIAN</div>
+        <div class="hemat-val-dominant" id="hematDailyBudget">Rp 0</div>
+        <div class="hemat-sub-dominant" id="hematDaysLeft">—</div>
+      </div>
+    </div>
+
+    <div class="card smooth-menu-card hidden" id="hematExpenseCard">
+      <button type="button" class="smooth-menu-btn" onclick="toggleFinanceCard('hematExpenseBody','hematExpenseIcon')">
+        <div class="smooth-menu-left">
+          <span class="smooth-icon">📝</span>
+          <span class="smooth-title">Catat Pengeluaran</span>
+        </div>
+        <span id="hematExpenseIcon" class="smooth-arrow">▶</span>
+      </button>
+      <div id="hematExpenseBody" class="smooth-menu-body">
+        <div class="input-group">
+          <label>Nominal Pengeluaran</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="hematExpenseAmount" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Keterangan (Opsional)</label>
+          <input id="hematExpenseNote" placeholder="Contoh: Makan siang">
+        </div>
+        <div class="input-group">
+          <label>Tanggal</label>
+          <input id="hematExpenseDate" type="date">
+        </div>
+        <button class="btn" onclick="addHematExpense()">Tambah Pengeluaran 💕</button>
+      </div>
+    </div>
+
+    <div class="card smooth-menu-card hidden" id="hematTodayCard">
+      <button type="button" class="smooth-menu-btn" onclick="toggleFinanceCard('hematTodayBody','hematTodayIcon')">
+        <div class="smooth-menu-left">
+          <span class="smooth-icon">📅</span>
+          <span class="smooth-title">Pengeluaran hari ini</span>
+        </div>
+        <span id="hematTodayIcon" class="smooth-arrow">▶</span>
+      </button>
+      <div id="hematTodayBody" class="smooth-menu-body">
+        <div id="hematTodayList"></div>
+      </div>
+    </div>
+
+    <div class="card smooth-menu-card">
+      <button type="button" class="smooth-menu-btn" onclick="toggleFinanceCard('hematHistoryBody','hematHistoryIcon')">
+        <div class="smooth-menu-left">
+          <span class="smooth-icon">📚</span>
+          <span class="smooth-title">Riwayat</span>
+        </div>
+        <span id="hematHistoryIcon" class="smooth-arrow">▶</span>
+      </button>
+      <div id="hematHistoryBody" class="smooth-menu-body">
+        <div id="hematHistoryList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CATATAN KEUANGAN ==================== -->
+  <section id="finance" class="page">
+    <div class="finance-balance">
+      <small>SALDO</small>
+      <strong id="totalBalance">Rp 0</strong>
+    </div>
+
+    <div class="card finance-fold-card">
+      <button type="button" class="finance-fold-header" onclick="toggleFinanceCard('financeInputBody', 'financeInputIcon')">
+        <span>💰 Input Catatan Keuangan</span>
+        <span id="financeInputIcon">▼</span>
+      </button>
+      <div id="financeInputBody">
+        <div class="mode-buttons">
+          <button id="incomeBtn"  class="mode-btn active" onclick="setFinanceType('income')">💚 Pemasukan</button>
+          <button id="expenseBtn" class="mode-btn"        onclick="setFinanceType('expense')">💗 Pengeluaran</button>
+        </div>
+        <br>
+        <div class="input-group">
+          <label>Jumlah</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="financeAmount" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Keterangan</label>
+          <input id="financeNote" placeholder="Contoh: Gaji, makan, transport...">
+        </div>
+        <div class="input-group">
+          <label>Tanggal</label>
+          <input id="financeDate" type="date">
+        </div>
+        <button class="btn" onclick="addTransaction()">Tambah Catatan 💕</button>
+      </div>
+    </div>
+
+    <div class="card finance-fold-card">
+      <button type="button" class="finance-fold-header" onclick="toggleFinanceCard('financeHistoryBody', 'financeHistoryIcon')">
+        <span>📋 Riwayat Transaksi</span>
+        <span id="financeHistoryIcon">▼</span>
+      </button>
+      <div id="financeHistoryBody">
+        <div class="finance-history-tabs">
+          <button id="historyTabDaily"   class="finance-history-tab active" onclick="setFinanceHistoryMode('daily')">📅 Harian</button>
+          <button id="historyTabWeekly"  class="finance-history-tab"        onclick="setFinanceHistoryMode('weekly')">📆 Mingguan</button>
+          <button id="historyTabMonthly" class="finance-history-tab"        onclick="setFinanceHistoryMode('monthly')">🗓️ Bulanan</button>
+        </div>
+        <div id="transactionList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== UANG KAS ==================== -->
+  <section id="cash" class="page">
+    <div class="finance-balance">
+      <small>TOTAL UANG KAS</small>
+      <strong id="totalCashBalance">Rp 0</strong>
+    </div>
+
+    <div class="card finance-fold-card">
+      <button type="button" class="finance-fold-header" onclick="toggleFinanceCard('cashInputBody', 'cashInputIcon')">
+        <span>👛 Input Uang Kas</span>
+        <span id="cashInputIcon">▼</span>
+      </button>
+      <div id="cashInputBody">
+        <div class="mode-buttons">
+          <button id="cashIncomeBtn"  class="mode-btn active" onclick="setCashType('income')">💚 Kas Masuk</button>
+          <button id="cashExpenseBtn" class="mode-btn"        onclick="setCashType('expense')">💗 Kas Keluar</button>
+        </div>
+        <br>
+        <div class="input-group">
+          <label>Jumlah</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="cashAmount" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Keterangan</label>
+          <input id="cashNote" placeholder="Contoh: Iuran bulanan, beli galon...">
+        </div>
+        <div class="input-group">
+          <label>Tanggal</label>
+          <input id="cashDate" type="date">
+        </div>
+        <button class="btn" onclick="addCashTransaction()">Tambah Kas 💕</button>
+      </div>
+    </div>
+
+    <div class="card finance-fold-card">
+      <button type="button" class="finance-fold-header" onclick="toggleFinanceCard('cashHistoryBody', 'cashHistoryIcon')">
+        <span>📋 Riwayat Uang Kas</span>
+        <span id="cashHistoryIcon">▼</span>
+      </button>
+      <div id="cashHistoryBody">
+        <div class="finance-history-tabs">
+          <button id="cashHistoryTabDaily"   class="finance-history-tab active" onclick="setCashHistoryMode('daily')">📅 Harian</button>
+          <button id="cashHistoryTabWeekly"  class="finance-history-tab"        onclick="setCashHistoryMode('weekly')">📆 Mingguan</button>
+          <button id="cashHistoryTabMonthly" class="finance-history-tab"        onclick="setCashHistoryMode('monthly')">🗓️ Bulanan</button>
+        </div>
+        <div id="cashTransactionList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TABUNGAN IMPIAN ==================== -->
+  <section id="saving" class="page">
+    <div class="card">
+      <button type="button" class="saving-fold-header" onclick="toggleFinanceCard('savingInputBody', 'savingInputIcon')">
+        <span>🌸 Buat Tabungan Impian</span>
+        <span id="savingInputIcon">▼</span>
+      </button>
+      <div id="savingInputBody" class="fold-body">
+        <div class="input-group">
+          <label>Nama Impian</label>
+          <input id="goalName" placeholder="Contoh: Tas Impian">
+        </div>
+        <div class="input-group">
+          <label>Target Tabungan</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="goalTarget" type="text" inputmode="decimal" placeholder="3.000.000" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Tabungan Awal</label>
+          <div class="money-input">
+            <span class="rp">Rp</span>
+            <input id="goalSaved" type="text" inputmode="decimal" placeholder="0" oninput="formatMoneyInput(this)">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Target Tanggal</label>
+          <input id="goalDeadline" type="date">
+        </div>
+        <button class="btn" onclick="addGoal()">🌷 Buat Tabungan Impian</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <button type="button" class="saving-fold-header" onclick="toggleFinanceCard('savingListBody', 'savingListIcon')">
+        <span>💖 Impian Saya</span>
+        <span id="savingListIcon">▼</span>
+      </button>
+      <div id="savingListBody" class="fold-body">
+        <div id="goalList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== JURNAL HARIAN ==================== -->
+  <section id="journal" class="page">
+    <div class="card">
+      <button type="button" class="journal-fold-header" onclick="toggleFinanceCard('journalInputBody', 'journalInputIcon')">
+        <span>📔 Tulis Jurnal Harian</span>
+        <span id="journalInputIcon">▼</span>
+      </button>
+      <div id="journalInputBody" class="fold-body">
+        <div class="input-group">
+          <label>Tanggal</label>
+          <input id="journalDate" type="date">
+        </div>
+        <div class="input-group">
+          <label>Judul</label>
+          <input id="journalTitle" placeholder="Judul jurnal">
+        </div>
+        <div class="input-group">
+          <label>Isi Jurnal</label>
+          <textarea id="journalText" placeholder="Tulis di sini..."></textarea>
+        </div>
+        <button class="btn" onclick="addJournal()">Simpan Jurnal 💕</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <button type="button" class="journal-fold-header" onclick="toggleFinanceCard('journalListBody', 'journalListIcon')">
+        <span>📚 Jurnal Saya</span>
+        <span id="journalListIcon">▼</span>
+      </button>
+      <div id="journalListBody" class="fold-body">
+        <div id="journalList"></div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /.content -->
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<nav class="bottom-nav" id="nav-bawah">
+  <button class="nav-btn active" onclick="showPage('home',this)">    <span class="nav-icon">🏠</span></button>
+  <button class="nav-btn"        onclick="showPage('split',this)">   <span class="nav-icon">🍰</span></button>
+  <button class="nav-btn"        onclick="showPage('discount',this)"><span class="nav-icon">💸</span></button>
+  <button class="nav-btn"        onclick="showPage('finance',this)"> <span class="nav-icon">💰</span></button>
+  <button class="nav-btn"        onclick="showPage('saving',this)">  <span class="nav-icon">🌸</span></button>
+</nav>
+
+<!-- ==================== MODAL BACKUP ==================== -->
+<div id="backupModal" class="modal-overlay" onclick="if(event.target === this) closeBackupModal()">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeBackupModal()">✕</button>
+    <h3 class="modal-title">☁️ Backup &amp; Restore</h3>
+    <p class="modal-desc">
+      Simpan data ke file (JSON) untuk pindah HP atau menghindari data hilang.
+    </p>
+
+    <button class="btn btn-backup" onclick="exportData()">
+      📤 Backup Data (Ekspor)
+    </button>
+
+    <div class="modal-import-wrap">
+      <button class="btn btn-restore" onclick="document.getElementById('importFile').click()">
+        📥 Restore Data (Impor)
+      </button>
+      <input type="file" id="importFile" accept=".json" onchange="importData(event)" hidden>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SWIPE HINT TOAST ==================== -->
+<div id="swipeHint" class="swipe-hint" role="status" aria-live="polite">
+  <span class="swipe-hint-icon">👉</span>
+  <span class="swipe-hint-text">
+    <strong>Geser ke kanan</strong> untuk kembali
+  </span>
+</div>
+
+</div><!-- /.app -->
+
+<script>
+/* =========================================
+   NAVIGASI & HALAMAN
+   ========================================= */
+function showPage(page, button) {
+  const activePage = document.querySelector(".page.active");
+  const leavingSplit = activePage && activePage.id === "split";
+
+  if (leavingSplit && page !== "split") {
+    if (typeof stopPercentDrawSound === "function") stopPercentDrawSound();
+    if (typeof resetPercentDrawData === "function") resetPercentDrawData();
+  }
+
+  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+
+  const targetPage = document.getElementById(page);
+  if (targetPage) targetPage.classList.add("active");
+
+  let appHeader = document.querySelector(".header");
+  if (appHeader) appHeader.style.display = (page === "home") ? "" : "none";
+
+  let bottomNav = document.getElementById("nav-bawah");
+  if (bottomNav) {
+    if (page === "home") {
+      bottomNav.style.display = "flex";
+    } else {
+      bottomNav.style.display = "none";
+    }
+  }
+
+  if (page === "split") {
+    document.getElementById("splitHomeView").classList.remove("hidden");
+    document.getElementById("splitDetailView").classList.add("hidden");
+    document.getElementById("splitForm").innerHTML = "";
+    traderReset();
+    resetPercentDrawData();
+  }
+
+  document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
+
+  if (button) {
+    button.classList.add("active");
+  } else {
+    let n = document.querySelector('.nav-btn[onclick*="' + page + '"]');
+    if (n) n.classList.add("active");
+  }
+
+  window.scrollTo(0, 0);
+  requestAnimationFrame(function() { window.scrollTo(0, 0); });
+
+  if (page === "finance") renderTransactions();
+  if (page === "saving") renderGoals();
+  if (page === "journal") renderJournals();
+  if (page === "discount" && typeof renderHemat === "function") renderHemat();
+  if (page === "cash") renderCash();
+}
+
+/* =========================================
+   UTILITAS DASAR
+   ========================================= */
+function parseMoney(v){
+  if(!v)return 0;
+  v=String(v).replace(/Rp/gi,"").replace(/\s/g,"").replace(/\./g,"").replace(",", ".");
+  let n=Number(v);
+  return isNaN(n)?0:n;
+}
+function formatRupiah(v){
+  if(isNaN(v)||v===null)v=0;
+  let p=(Math.round(v*100)/100).toFixed(2).split(".");
+  let i=Number(p[0]).toLocaleString("id-ID");
+  return "Rp "+i+(p[1]==="00"?"":","+p[1].replace(/0+$/,""));
+}
+function formatMoneyInput(input){
+  let v=input.value.replace(/[^\d.,]/g,"");
+  let c=v.indexOf(",");
+  if(c!==-1){ v=v.substring(0,c)+","+v.substring(c+1).replace(/,/g,""); }
+  let p=v.split(",");
+  let i=p[0].replace(/\./g,"");
+  if(i)i=Number(i).toLocaleString("id-ID");
+  input.value=p[1]!==undefined ? i+","+p[1].slice(0,2) : i;
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function dateID(d){
+  if(!d)return"";
+  let p=d.split("-");
+  return p.length===3 ? p[2]+"/"+p[1]+"/"+p[0] : d;
+}
+function todayISO() {
+  let d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function daysBetween(startISO, endISO) {
+  let a = new Date(startISO + "T00:00:00");
+  let b = new Date(endISO + "T00:00:00");
+  return Math.floor((b - a) / 86400000);
+}
+function toggleFinanceCard(bodyId, iconId) {
+  const body = document.getElementById(bodyId);
+  const icon = document.getElementById(iconId);
+  if (!body || !icon) return;
+  const isOpen = body.style.display !== "none";
+  body.style.display = isOpen ? "none" : "block";
+  icon.textContent = isOpen ? "▶" : "▼";
+}
+function foldElement(el){
+  if(!el)return;
+  el.style.overflow="hidden";
+  el.style.transition="max-height .60s ease,opacity .45s ease,transform .60s ease,margin .60s ease,padding .60s ease";
+  el.style.maxHeight=el.scrollHeight+"px";
+  requestAnimationFrame(function(){
+    el.style.maxHeight="0px"; el.style.opacity="0"; el.style.transform="translateY(-14px) scale(.98)";
+    el.style.marginTop="0px"; el.style.marginBottom="0px"; el.style.paddingTop="0px"; el.style.paddingBottom="0px";
+  });
+  setTimeout(() => { el.style.display = "none"; }, 600);
+}
+
+/* =========================================
+   FUNGSI MODAL BACKUP
+   ========================================= */
+function openBackupModal() {
+  document.getElementById('backupModal').classList.add('show');
+}
+function closeBackupModal() {
+  document.getElementById('backupModal').classList.remove('show');
+}
+
+/* =========================================
+   SPLIT BILL & UNDIAN
+   ========================================= */
+let splitAudio=null;
+function getSplitAudio(){ if(!splitAudio){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null; splitAudio=new AC(); } if(splitAudio.state==="suspended")splitAudio.resume(); return splitAudio; }
+function splitClickSound(){ let ac=getSplitAudio();if(!ac)return; let n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain(); o.type="sine"; o.frequency.setValueAtTime(480,n); o.frequency.exponentialRampToValueAtTime(760,n+.09); g.gain.setValueAtTime(.0001,n); g.gain.exponentialRampToValueAtTime(.22,n+.012); g.gain.exponentialRampToValueAtTime(.0001,n+.13); o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+.14); }
+function splitResultSound() { let ac = getSplitAudio(); if (!ac) return; fetch("sound/coin.mp3").then(response => response.arrayBuffer()).then(buffer => ac.decodeAudioData(buffer)).then(audioBuffer => { let source = ac.createBufferSource(); source.buffer = audioBuffer; source.connect(ac.destination); source.start(0); }).catch(err => console.log(err)); }
+function percentDrawSound() { stopPercentDrawSound(); let ac = getSplitAudio(); if (!ac) return; const requestId = (window.percentDrawSoundRequestId || 0) + 1; window.percentDrawSoundRequestId = requestId; fetch("sound/undipersentase.mp3").then(response => response.arrayBuffer()).then(buffer => ac.decodeAudioData(buffer)).then(audioBuffer => { if (window.percentDrawSoundRequestId !== requestId) return; let source = ac.createBufferSource(); source.buffer = audioBuffer; source.connect(ac.destination); window.percentDrawSoundSource = source; source.onended = function() { if (window.percentDrawSoundSource === source) window.percentDrawSoundSource = null; }; source.start(0); }).catch(err => console.log(err)); }
+function stopPercentDrawSound() { window.percentDrawSoundRequestId = (window.percentDrawSoundRequestId || 0) + 1; if (window.percentDrawSoundSource) { try { window.percentDrawSoundSource.stop(); } catch (e) {} try { window.percentDrawSoundSource.disconnect(); } catch (e) {} window.percentDrawSoundSource = null; } }
+function splitCountingSound() { let ac = getSplitAudio(); if (!ac) return; fetch("sound/counting.mp3").then(response => response.arrayBuffer()).then(buffer => ac.decodeAudioData(buffer)).then(audioBuffer => { let source = ac.createBufferSource(); source.buffer = audioBuffer; source.loop = true; source.connect(ac.destination); source.start(0); window.splitCountingSource = source; }).catch(err => console.log(err)); }
+function stopSplitCountingSound() { if (window.splitCountingSource) { try { window.splitCountingSource.stop(0); } catch (e) {} window.splitCountingSource = null; } }
+
+function splitMode(mode) {
+  document.querySelectorAll(".split-collapsed").forEach(function(el) {
+    el.classList.remove("split-collapsed");
+    el.style.display = "";
+  });
+
+  let detail = document.getElementById("splitDetailView"), home = document.getElementById("splitHomeView"), f = document.getElementById("splitForm");
+  home.classList.add("hidden"); detail.classList.remove("hidden");
+
+  let title="",description="";
+  if(mode==="equal"){ title="🍽️ Bagi Rata"; description="Bagi tagihan sama rata untuk semua peserta."; }
+  if(mode==="weight"){ title="⚖️ Timbang Badan"; description="Pembagian berdasarkan berat badan."; }
+  if(mode==="trader"){ title="🎁 Undi Traktir"; description="Undi dan Tentukan siapa yang akan Terpilih."; }
+  if(mode==="percent"){ title="📊 Undi Persentase"; description="Tentukan persentasenya, lalu mulai Undian."; }
+  traderReset(); resetPercentDrawData();
+
+  f.innerHTML=`<h2>${title}</h2><p>${description}</p><div class="input-group" id="mainSplitTotalBox"><label>Total Tagihan</label><div class="money-input"><span class="rp">Rp</span><input id="mainSplitTotal" type="text" inputmode="decimal" placeholder="0,00" oninput="formatMoneyInput(this)"></div></div><div id="splitMethodArea"></div>`;
+
+  let area=document.getElementById("splitMethodArea");
+  if(mode==="equal"){ area.innerHTML=`<div class="input-group"><label>Jumlah Peserta</label><input id="eqPeople" type="number" min="1" placeholder="Contoh: 4"></div><button class="btn" onclick="calcEqual()">Hitung Pembagian ✨</button><div id="eqResult" class="result hidden"></div>`; }
+  if (mode === "weight") { area.innerHTML = `<div class="input-group" id="wPeopleBox"><label>Jumlah Peserta</label><input id="wPeople" type="number" min="1" max="50" placeholder="Contoh: 4" oninput="makeWeight()"></div><div id="wFields"></div>`; }
+  if(mode==="trader"){ area.innerHTML=`<div class="input-group"><label>Jumlah Peserta</label><input id="trPeople" type="number" min="2" max="50" placeholder="Contoh: 10"></div><div class="input-group"><label>Donatur</label><input id="trCount" type="number" min="1" placeholder="Contoh: 3"></div><button id="trContinueBtn" class="btn" onclick="prepareTraderNames()">✨ LANJUT ISI NAMA</button><div id="trNameFields"></div><div id="trDrawArea"></div>`; }
+  if(mode==="percent"){ area.innerHTML=`<div class="input-group" id="pPeopleBox"><label>Jumlah Peserta</label><input id="pPeople" type="number" min="1" max="50" placeholder="Contoh: 4" oninput="makePercent()"></div><div id="pFields"></div>`; }
+  f.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function closeSplitMode() {
+  document.getElementById("splitDetailView").classList.add("hidden");
+  document.getElementById("splitHomeView").classList.remove("hidden");
+  document.getElementById("splitForm").innerHTML = "";
+  traderReset(); resetPercentDrawData();
+  window.scrollTo(0, 0);
+}
+
+function animateSplitCalculation(result, title, items, unitText) {
+  if (!result) return;
+  result.classList.remove("hidden");
+  let index = 0;
+  stopSplitCountingSound(); splitCountingSound();
+  function showMachine() {
+    result.innerHTML = `<div style="text-align:center;padding:20px 12px;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10)"><div style="font-size:42px;display:inline-block;animation:splitMachineJS .18s infinite alternate">⚙️</div><h3 style="margin:10px 0 5px">${title}</h3><p style="margin:0;color:#8a808f">Sedang menghitung...</p><div style="margin-top:12px;font-size:14px;color:#a05ac8">Mohon tunggu sebentar ✨</div></div>`;
+    setTimeout(showNext, 1100);
+  }
+  function showNext() {
+    if (index >= items.length) {
+      stopSplitCountingSound();
+      let h = `<div style="text-align:center;padding:15px 10px;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10)"><div style="font-size:26px;margin-bottom:5px">🎉</div><h3 style="margin:5px 0 14px">Hasil Pembagian</h3>`;
+      if (unitText) h += `<p style="margin:0 0 12px;color:#8a808f">${unitText}</p>`;
+      items.forEach(function(x) { h += `<div style="margin-top:9px;padding:12px;background:rgba(250,247,252,.85);border-radius:14px;text-align:left"><b>${esc(x.name)}</b><div style="font-size:13px;color:#8a808f;margin-top:3px">${x.valueText}</div><div style="font-size:18px;font-weight:bold;color:#a05ac8;margin-top:4px">${x.moneyText}</div></div>`; });
+      result.innerHTML = h + "</div>";
+      return;
+    }
+    let x = items[index];
+    stopSplitCountingSound(); splitCountingSound();
+    result.innerHTML = `<div style="text-align:center;padding:18px 10px;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10)"><div style="font-size:13px;color:#8a808f;margin-bottom:7px">Menghitung ${index+1} / ${items.length}</div><div style="font-size:38px;display:inline-block;animation:splitMachineJS .18s infinite alternate">⚙️</div><p style="margin:7px 0;color:#8a808f">Menghitung ${esc(x.name)}...</p></div>`;
+    setTimeout(function() {
+      splitResultSound();
+      result.innerHTML = `<div style="padding:15px;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10);animation:splitResultJS .45s ease-out"><div style="font-size:13px;color:#8a808f">Hasil ${index+1} / ${items.length}</div><div style="font-size:20px;font-weight:bold;margin-top:6px">${esc(x.name)}</div><div style="font-size:13px;color:#8a808f;margin-top:3px">${x.valueText}</div><div style="font-size:25px;font-weight:bold;color:#a05ac8;margin-top:7px">${x.moneyText}</div></div>`;
+      index++; setTimeout(showNext, 850);
+    }, 850);
+  }
+  showMachine();
+}
+
+if(!document.getElementById("splitBillAnimationStyle")){
+  let style=document.createElement("style"); style.id="splitBillAnimationStyle";
+  style.innerHTML=`@keyframes splitMachineJS{from{transform:rotate(-8deg) scale(1)}to{transform:rotate(8deg) scale(1.12)}} @keyframes splitResultJS{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}`;
+  document.head.appendChild(style);
+}
+if (!document.getElementById("equalCashAnimationStyle")) {
+  let style = document.createElement("style"); style.id = "equalCashAnimationStyle";
+  style.textContent = `.eqCashMachine{text-align:center;padding:22px 12px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(242,255,246,.85));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(30,120,70,.12);overflow:hidden}.eqCashStack{position:relative;width:150px;height:95px;margin:0 auto 8px}.eqCashBill{position:absolute;left:50%;top:50%;font-size:57px;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 3px rgba(0,0,0,.12))}.eqCashBill1{animation:eqCashMove1 .42s ease-in-out infinite alternate}.eqCashBill2{animation:eqCashMove2 .42s ease-in-out infinite alternate}.eqCashBill3{animation:eqCashMove3 .42s ease-in-out infinite alternate}.eqCashTitle{margin:8px 0;font-weight:bold;color:#25834c;font-size:16px}.eqCashTrack{height:7px;max-width:220px;margin:14px auto 10px;background:#dcefe2;border-radius:10px;overflow:hidden}.eqCashProgress{width:35%;height:100%;background:linear-gradient(90deg,#48c774,#b5ed65);border-radius:10px;animation:eqCashProgressMove .75s ease-in-out infinite alternate}.eqCashWait{margin:0;font-size:13px;color:#8a808f}@keyframes eqCashMove1{from{transform:translate(-50%,-50%) rotate(-12deg) translateX(-17px) translateY(5px)}to{transform:translate(-50%,-50%) rotate(8deg) translateX(8px) translateY(-5px)}}@keyframes eqCashMove2{from{transform:translate(-50%,-50%) rotate(10deg) translateX(15px) translateY(-4px)}to{transform:translate(-50%,-50%) rotate(-8deg) translateX(-8px) translateY(5px)}}@keyframes eqCashMove3{from{transform:translate(-50%,-50%) rotate(-5deg) translateY(-8px)}to{transform:translate(-50%,-50%) rotate(7deg) translateY(5px)}}@keyframes eqCashProgressMove{from{width:12%;margin-left:0}to{width:75%;margin-left:25%}}`;
+  document.head.appendChild(style);
+}
+
+function calcEqual() {
+  let t = parseMoney(document.getElementById("mainSplitTotal").value), n = Number(document.getElementById("eqPeople").value);
+  if (t <= 0) { alert("Masukkan Total Tagihan terlebih dahulu."); return; }
+  if (!n || n < 1) { alert("Jumlah peserta tidak valid."); return; }
+  let result = document.getElementById("eqResult"); result.classList.remove("hidden");
+  document.getElementById("mainSplitTotalBox").classList.add("split-collapsed");
+  document.querySelector("#splitMethodArea .input-group").classList.add("split-collapsed");
+  result.innerHTML = `<div class="eqCashMachine"><div class="eqCashStack"><div class="eqCashBill eqCashBill1">💵</div><div class="eqCashBill eqCashBill2">💵</div><div class="eqCashBill eqCashBill3">💵</div></div><p class="eqCashTitle">Sedang menghitung uang...</p><div class="eqCashTrack"><div class="eqCashProgress"></div></div><p class="eqCashWait">Mohon tunggu sebentar ✨</p></div>`;
+  setTimeout(function() { splitCountingSound(); }, 220);
+  setTimeout(function() {
+    stopSplitCountingSound(); splitResultSound();
+    result.innerHTML = `<div style="text-align:center;padding:18px;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10);animation:splitResultJS .45s ease-out"><div style="font-size:32px;margin-bottom:8px">💰</div><p>Setiap peserta membayar</p><div class="big">${formatRupiah(t/n)}</div></div>`;
+    saveSplitHistory({ mode: "🍽️ Bagi Rata", date: new Date().toISOString(), summary: "Total tagihan: " + formatRupiah(t) + " | " + n + " Peserta" + " | Per peserta: " + formatRupiah(t / n) });
+    result.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 1100);
+}
+
+function makeWeight() {
+  let n = Number(document.getElementById("wPeople").value), c = document.getElementById("wFields");
+  if (!n || n < 1) { c.innerHTML = ""; return; }
+  if (n > 50) { document.getElementById("wPeople").value = 50; n = 50; }
+  let h = "";
+  for (let i = 1; i <= n; i++) { h += `<div class="person-card"><div class="person-title">👤No. ${i}</div><input id="wn${i}" placeholder="Nama"><br><br><input id="wv${i}" type="number" min="1" step=".1" placeholder="Berat badan (kg)"></div>`; }
+  c.innerHTML = `<div id="wInputArea">${h}<button class="btn" onclick="calcWeight()">Hitung ⚖️</button></div><div id="wResult" class="result hidden"></div>`;
+}
+
+let splitHistory = JSON.parse(localStorage.getItem("catatHitungSplitHistory") || "[]");
+function saveSplitHistory(data) { splitHistory.unshift(data); localStorage.setItem("catatHitungSplitHistory", JSON.stringify(splitHistory)); }
+
+function renderSplitHistory() {
+  let list = document.getElementById("splitHistoryList"); if (!list) return;
+  if (splitHistory.length === 0) { list.innerHTML = "<p>Belum ada riwayat Split Bill.</p>"; return; }
+  list.innerHTML = "";
+  let groups = {}, modeNames = {};
+  splitHistory.forEach(function(item, index) {
+    let originalMode = item.mode || "Split Bill"; let name = originalMode.toLowerCase(); let key = "";
+    if (name.includes("bagi rata")) key = "Bagi Rata"; else if (name.includes("timbang badan")) key = "Timbang Badan"; else if (name.includes("undi traktir")) key = "Undi Traktir"; else if (name.includes("undi persentase")) key = "Undi Persentase"; else key = originalMode;
+    if (!groups[key]) { groups[key] = []; modeNames[key] = originalMode; }
+    groups[key].push({ item: item, index: index });
+  });
+  let modeOrder = ["Bagi Rata", "Timbang Badan", "Undi Traktir", "Undi Persentase"];
+  let orderedModes = modeOrder.filter(function(mode) { return groups[mode]; });
+  Object.keys(groups).forEach(function(mode) { if (!orderedModes.includes(mode)) orderedModes.push(mode); });
+  orderedModes.forEach(function(mode) {
+    let groupCard = document.createElement("div"); groupCard.className = "person-card"; groupCard.style.marginBottom = "12px"; groupCard.style.padding = "14px"; groupCard.style.borderRadius = "16px";
+    let groupHeader = document.createElement("button"); groupHeader.type = "button"; groupHeader.style.width = "100%"; groupHeader.style.border = "none"; groupHeader.style.background = "transparent"; groupHeader.style.textAlign = "left"; groupHeader.style.padding = "0"; groupHeader.style.color = "inherit"; groupHeader.style.cursor = "pointer";
+    groupHeader.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><strong style="font-size:15px">${esc(mode)}</strong><span style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;color:#8a808f;">${groups[mode].length} riwayat</span><span class="split-group-icon" style="font-size:18px">＋</span></span></div>`;
+    groupCard.appendChild(groupHeader);
+    let groupBody = document.createElement("div"); groupBody.className = "hidden"; groupBody.style.marginTop = "12px";
+    groups[mode].forEach(function(entry) {
+      let item = entry.item;
+      let card = document.createElement("div"); card.className = "person-card"; card.style.marginBottom = "10px"; card.style.padding = "12px"; card.style.borderRadius = "12px";
+      let total = item.summary || ""; let totalMatch = total.match(/Total tagihan:\s*(Rp\s*[\d.,]+)/i); let totalText = totalMatch ? totalMatch[1] : "Lihat detail";
+      let dateText = item.date || ""; let parsedDate = new Date(dateText);
+      if (!isNaN(parsedDate.getTime())) { dateText = parsedDate.toLocaleString("id-ID", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric", hour12: false }).replace(",", ""); }
+      let header = document.createElement("button"); header.type = "button"; header.style.width = "100%"; header.style.border = "none"; header.style.background = "transparent"; header.style.textAlign = "left"; header.style.padding = "0"; header.style.color = "inherit"; header.style.cursor = "pointer";
+      header.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><strong style="font-size:14px">${esc(mode)}</strong><span class="split-history-icon" style="font-size:18px">＋</span></div><div style="margin-top:8px;font-size:18px;font-weight:bold;color:#a05ac8;">${esc(totalText)}</div><div style="margin-top:8px;font-size:12px;color:#8a808f;">🕒 ${esc(dateText)}</div>`;
+      card.appendChild(header);
+      let detail = document.createElement("div"); detail.className = "hidden"; detail.style.marginTop = "12px"; detail.style.paddingTop = "12px"; detail.style.borderTop = "1px solid rgba(238,229,243,.7)";
+      let detailTitle = document.createElement("strong"); detailTitle.textContent = "📋 Detail Informasi"; detail.appendChild(detailTitle);
+      let summary = document.createElement("p"); summary.style.fontSize = "13px"; summary.style.lineHeight = "1.7"; summary.style.overflowWrap = "anywhere"; summary.textContent = item.summary || "Tidak ada detail."; detail.appendChild(summary);
+      let button = document.createElement("button"); button.type = "button"; button.className = "btn"; button.textContent = "🗑️ Hapus"; button.style.marginTop = "8px";
+      button.onclick = function(event) { event.stopPropagation(); deleteSplitHistory(item, card); };
+      detail.appendChild(button); card.appendChild(detail);
+      header.onclick = function() { let isHidden = detail.classList.contains("hidden"); detail.classList.toggle("hidden", !isHidden); let icon = header.querySelector(".split-history-icon"); if (icon) icon.textContent = isHidden ? "－" : "＋"; };
+      groupBody.appendChild(card);
+    });
+    groupCard.appendChild(groupBody);
+    groupHeader.onclick = function() { let isHidden = groupBody.classList.contains("hidden"); groupBody.classList.toggle("hidden", !isHidden); let icon = groupHeader.querySelector(".split-group-icon"); if (icon) icon.textContent = isHidden ? "－" : "＋"; };
+    list.appendChild(groupCard);
+  });
+}
+
+function deleteSplitHistory(targetItem, targetCard) {
+  let index = splitHistory.indexOf(targetItem); if (index === -1) return;
+  splitHistory.splice(index, 1); localStorage.setItem("catatHitungSplitHistory", JSON.stringify(splitHistory));
+  if (targetCard && targetCard.isConnected) {
+    let groupBody = targetCard.parentElement; let groupCard = groupBody ? groupBody.parentElement : null; targetCard.remove();
+    if (groupBody && groupCard) {
+      let remaining = groupBody.querySelectorAll(":scope > .person-card").length; let countLabel = groupCard.querySelector("span[style*='font-size:12px']"); if (countLabel) countLabel.textContent = remaining + " riwayat"; if (remaining === 0) groupCard.remove();
+    }
+  } else { renderSplitHistory(); }
+  let list = document.getElementById("splitHistoryList"); if (splitHistory.length === 0 && list) list.innerHTML = "<p>Belum ada riwayat Split Bill.</p>";
+}
+
+function toggleSplitHistory() {
+  let body = document.getElementById("splitHistoryBody"), icon = document.getElementById("splitHistoryIcon"); if (!body) return;
+  body.classList.toggle("hidden"); let isOpen = !body.classList.contains("hidden");
+  if (icon) { icon.textContent = isOpen ? "▼" : "▶"; }
+  if (isOpen && typeof renderSplitHistory === "function") renderSplitHistory();
+}
+
+function calcWeight(){
+  splitClickSound();
+  let t=parseMoney(document.getElementById("mainSplitTotal").value), n=Number(document.getElementById("wPeople").value);
+  if(t<=0){ alert("Masukkan Total Tagihan terlebih dahulu."); return; }
+  if(!n||n<1){ alert("Masukkan jumlah peserta."); return; }
+  let sum=0,a=[];
+  for(let i=1;i<=n;i++){
+    let weight=Number(document.getElementById("wv"+i).value);
+    if(!weight||weight<=0){ alert("Isi berat(Kg) "+i+"."); document.getElementById("wv"+i).focus(); return; }
+    let name=document.getElementById("wn"+i).value.trim(); if(!name)name="Peserta "+i; sum+=weight; a.push([name,weight]);
+  }
+  if(sum<=0){ alert("Total berat belum valid."); return; }
+  let unit=t/sum, items=[];
+  a.forEach(function(x){ items.push({ name:x[0], valueText:x[1]+" kg", moneyText:formatRupiah(x[1]*unit) }); });
+  saveSplitHistory({ mode: "⚖️ Timbang Badan", date: new Date().toISOString(), summary: "Total tagihan: " + formatRupiah(t) + " | Jumlah Peserta: " + n + " | " + items.map(function(item) { return item.name + ": " + item.moneyText; }).join(", ") });
+  animateSplitCalculation(document.getElementById("wResult"), "⚖️ Timbang Badan", items, "Nilai satuan: "+formatRupiah(unit)+" / kg");
+}
+
+/* TRADER / UNDIAN TRAKTIR */
+let traderNames = [], traderSelected = [], traderTarget = 0, traderDrawing = false, traderAudio = null, traderAudioContext = null;
+const TRADER_ROLL_SOUND = "sound/unditraktir.mp3";
+function getTraderAudio() { if (!traderAudioContext) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; traderAudioContext = new AC(); } if (traderAudioContext.state === "suspended") traderAudioContext.resume(); return traderAudioContext; }
+function traderClickSound() { let ac = getTraderAudio(); if (!ac) return; let n = ac.currentTime, o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.setValueAtTime(420, n); o.frequency.exponentialRampToValueAtTime(700, n + .08); g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(.22, n + .01); g.gain.exponentialRampToValueAtTime(.0001, n + .11); o.connect(g); g.connect(ac.destination); o.start(n); o.stop(n + .12); }
+function traderWinnerSound() { let audio = new Audio("sound/coin.mp3"); audio.preload = "auto"; audio.volume = 1; audio.play().catch(function(err) { console.log(err); }); }
+function traderReset() { traderNames = []; traderSelected = []; traderTarget = 0; traderDrawing = false; if (traderAudio) { traderAudio.pause(); traderAudio.currentTime = 0; } }
+
+function prepareTraderNames(){
+  traderClickSound();
+  let n=Number(document.getElementById("trPeople").value), k=Number(document.getElementById("trCount").value), area=document.getElementById("trNameFields");
+  if(!n||n<2){ alert("Jumlah peserta yang makan tidak valid."); return; }
+  if(!k||k<1||k>n){ alert("Jumlah peserta yang traktir tidak valid."); return; }
+  if(!area)return;
+  let html=`<div class="person-card" style="margin-top:12px"><div class="person-title">👥 Daftar Peserta</div><p style="margin:5px 0 12px;color:#8a808f;font-size:13px">Masukkan nama setiap peserta yang hadir.</p>`;
+  for(let i=1;i<=n;i++){ html+=`<div style="margin-top:10px"><label style="display:block;margin-bottom:5px;font-size:13px;color:#8a808f">No. ${i}</label><input id="trName${i}" type="text" placeholder="Nama" autocomplete="off" style="width:100%"></div>`; }
+  html+=`<button class="btn" onclick="startTraderDraw()" style="margin-top:15px;width:100%">🎲 MULAI UNDIAN</button></div>`;
+  area.innerHTML=html;
+  setTimeout(function(){ let first=document.getElementById("trName1"); if(first){ first.focus(); first.scrollIntoView({ behavior:"smooth", block:"center" }); } },150);
+}
+
+function startTraderDraw() {
+  let n = Number(document.getElementById("trPeople").value), k = Number(document.getElementById("trCount").value), totalInput = document.getElementById("mainSplitTotal"), names = [];
+  if(!n || n < 2){ alert("Jumlah Peserta yang makan tidak valid."); return; }
+  if(!k || k < 1 || k > n){ alert("Jumlah Peserta tidak valid."); return; }
+  if(!totalInput || !totalInput.value.trim()){ alert("Total tagihan belum diisi."); if(totalInput) totalInput.focus(); return; }
+  for(let i = 1; i <= n; i++){ let el = document.getElementById("trName" + i), name = el ? el.value.trim() : ""; if(!name){ alert("Nama " + i + " belum diisi."); if(el) el.focus(); return; } names.push(name); }
+  let normalized = names.map(function(x){ return x.toLowerCase(); });
+  for(let i = 0; i < normalized.length; i++){ if(normalized.indexOf(normalized[i]) !== i){ alert("Nama tidak boleh sama. Periksa kembali semua nama."); return; } }
+  traderNames = names; traderSelected = []; traderTarget = k; traderDrawing = false;
+  let totalText = totalInput.value.trim();
+  let nameArea = document.getElementById("trNameFields");
+  if(nameArea){ foldElement(nameArea); let continueBtn = document.getElementById("trContinueBtn"); if (continueBtn) continueBtn.style.display = "none"; }
+  let totalBox = document.getElementById("mainSplitTotalBox");
+  let peopleBox = document.getElementById("trPeople").closest(".input-group");
+  let countBox = document.getElementById("trCount").closest(".input-group");
+  if (totalBox) foldElement(totalBox);
+  if (peopleBox) foldElement(peopleBox);
+  if (countBox) foldElement(countBox);
+
+  let drawArea = document.getElementById("trDrawArea");
+  if(!drawArea) return;
+
+  drawArea.innerHTML = `
+    <div class="trader-wrapper">
+      <div class="person-card" style="animation:splitResultJS .45s ease-out;text-align:center;">
+        <div id="traderBillSummary" class="hidden"></div>
+        <div id="traderDrawCard">
+          <h2>🎰 Undian Traktir</h2>
+          <div class="trader-round" id="traderRound" style="margin-top:10px;text-align:center">PUTARAN 1 / ${k}</div>
+          <div id="traderDice" class="trader-dice">
+            <div style="font-size:20px;font-weight:bold;color:#a05ac8;text-align:center;">Siap untuk diundi 🎲</div>
+          </div>
+          <div id="traderResult" class="trader-result">
+            <p>Tekan START untuk memulai.</p>
+            <div class="winner-name">✨ ? ✨</div>
+          </div>
+          <div id="traderStatus" class="trader-status">Siapa yang akan traktir? 👀</div>
+          <button id="traderDrawBtn" class="btn trader-draw-btn" onclick="drawTrader()" style="width:100%;margin-top:15px;padding:14px;font-size:16px;">▶️ START</button>
+          <div id="traderWinners" class="trader-winners">${renderTraderWinnersHTML()}</div>
+        </div>
+      </div>
+    </div>`;
+
+  drawArea.dataset.totalAmount = String(parseMoney(totalText)); drawArea.dataset.traderTarget = String(k);
+  let openingAudio = new Audio("sound/terompet-pembukaan.mp3"); openingAudio.volume = 1; openingAudio.play().catch(function(){});
+  window.scrollTo(0, 0);
+}
+
+function renderTraderWinnersHTML(){ if(!traderSelected.length)return ""; let html="<div class='trader-status'><b>Yang sudah terpilih:</b></div>"; traderSelected.forEach(function(name,index){ html+=`<div class="trader-winner-row">🏆 ${index+1}. ${esc(name)}</div>`; }); return html; }
+
+function drawTrader() {
+  if (traderDrawing || traderSelected.length >= traderTarget) return;
+  traderDrawing = true;
+  traderClickSound();
+
+  let button = document.getElementById("traderDrawBtn"), dice = document.getElementById("traderDice"), result = document.getElementById("traderResult"), status = document.getElementById("traderStatus");
+  if (!button || !dice || !result || !status) { traderDrawing = false; return; }
+
+  button.disabled = true; button.textContent = "🎰 MENGUNDI...";
+  dice.classList.add("shaking"); result.innerHTML = `<p>🎰 Slot sedang berputar...</p><div class="winner-name">✨ ? ✨</div>`; status.textContent = "🎰 Gulungan nama sedang berputar...";
+
+  let available = traderNames.filter(function(name) { return traderSelected.indexOf(name) === -1; });
+  let roundDisplay = document.getElementById("traderRound");
+  if (roundDisplay) {
+    if (traderSelected.length < traderTarget) roundDisplay.textContent = "PUTARAN " + (traderSelected.length + 1) + " / " + traderTarget;
+    else roundDisplay.textContent = "SEMUA PUTARAN SELESAI";
+  }
+
+  if (!available.length) { traderDrawing = false; dice.classList.remove("shaking"); return; }
+
+  let stopAnimasi = false; let namaTerakhirDiDadu = "";
+  if (window.animasiTraderReq) { cancelAnimationFrame(window.animasiTraderReq); window.animasiTraderReq = null; }
+  if (traderAudio) { traderAudio.pause(); traderAudio.currentTime = 0; }
+  traderAudio = new Audio(TRADER_ROLL_SOUND); traderAudio.preload = "auto"; traderAudio.volume = 1;
+
+  let slotStart = Date.now(); let lastUpdate = 0;
+
+  function hentikanDanTampilkanPemenang() {
+    if (stopAnimasi) return;
+    stopAnimasi = true; traderDrawing = false;
+    if (window.animasiTraderReq) { cancelAnimationFrame(window.animasiTraderReq); window.animasiTraderReq = null; }
+    if (!namaTerakhirDiDadu) namaTerakhirDiDadu = available[Math.floor(Math.random() * available.length)];
+
+    dice.classList.remove("shaking");
+    dice.innerHTML = `<div style="animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; font-size:28px;font-weight:bold;color:#a05ac8;padding:18px 8px;text-align:center;">🏆 ${esc(namaTerakhirDiDadu)} 🏆</div>`;
+    result.innerHTML = `<p>🎉 YANG TRAKTIR PUTARAN INI:</p><div class="winner-name" style="animation: popIn 0.5s ease-out;">🏆 ${esc(namaTerakhirDiDadu)} 🏆</div>`;
+    status.textContent = "🎉 Terpilih! Nama ini tidak akan keluar lagi.";
+    if (traderSelected.indexOf(namaTerakhirDiDadu) === -1) traderSelected.push(namaTerakhirDiDadu);
+
+    let rd = document.getElementById("traderRound");
+    if (rd) {
+      if (traderSelected.length < traderTarget) rd.textContent = "PUTARAN " + (traderSelected.length + 1) + " / " + traderTarget;
+      else rd.textContent = "SEMUA PUTARAN SELESAI";
+    }
+
+    traderWinnerSound();
+    let winners = document.getElementById("traderWinners"); if (winners) winners.innerHTML = renderTraderWinnersHTML();
+
+    if (traderSelected.length >= traderTarget) {
+      button.disabled = true; button.textContent = "🎉 UNDIAN SELESAI"; status.innerHTML = "🎉 Trimakasih sampai Jumpa di pertemuan berikutnya💕";
+      setTimeout(function() {
+        traderWinnerSound();
+        let billSummary = document.getElementById("traderBillSummary"), drawArea = document.getElementById("trDrawArea");
+        let totalAmount = Number(drawArea ? drawArea.dataset.totalAmount : 0), payerCount = Number(drawArea ? drawArea.dataset.traderTarget : 0);
+
+        if (billSummary && totalAmount > 0 && payerCount > 0) {
+          let eachPays = totalAmount / payerCount;
+          billSummary.classList.remove("hidden");
+          billSummary.innerHTML = `<div style="margin-top:18px;padding:20px 15px;border-radius:18px;background:linear-gradient(145deg,rgba(255,240,247,.85),rgba(243,234,255,.85));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 18px rgba(120,90,140,.12);text-align:center;animation:splitResultJS .5s ease-out;"><div style="font-size:35px">🎉💰🎉</div><h3 style="color:#a05ac8;margin:10px 0">RINCIAN TAGIHAN</h3><p style="margin:12px 0 4px;color:#8a808f">Total Tagihan</p><div style="margin:15px 0;padding:15px;background:rgba(255,255,255,.85);border-radius:14px;text-align:left;"><h4 style="margin:0 0 12px;color:#a05ac8;text-align:center">🏆 Nama yang Terpilih</h4>${traderSelected.map(function(name, index) { return `<div style="padding:10px;margin-bottom:8px;border-radius:10px;background:rgba(255,240,247,.85);"><strong>${index + 1}. ${name}</strong></div>`; }).join("")}</div><div style="font-size:22px;font-weight:bold">${formatRupiah(totalAmount)}</div><p style="margin:15px 0 4px;color:#8a808f">Jumlah Pemenang</p><div style="font-size:22px;font-weight:bold">${payerCount} 🏆🎉</div><div style="margin-top:18px;padding:16px 10px;background:rgba(255,255,255,.85);border-radius:14px;"><p style="margin:0 0 8px;color:#8a808f">Masing-masing Membayar</p><div style="font-size:27px;font-weight:bold;color:#a05ac8;">${formatRupiah(eachPays)}</div></div><p style="font-size:12px;color:#8a808f;margin:12px 0 0">Trimakasih Sampai Jumpa Di pertemuan Berikutnya 💕</p></div>`;
+          setTimeout(function() { billSummary.scrollIntoView({ behavior: "smooth", block: "center" }); }, 300);
+        }
+
+        saveSplitHistory({ mode: "🎰 Undi Traktir", date: new Date().toISOString(), summary: "Total tagihan: " + formatRupiah(totalAmount) + " | Jumlah Pemenang: " + payerCount + " Orang | Per Peserta: " + formatRupiah(totalAmount / payerCount) + " | Pemenang: " + traderSelected.join(", ") });
+
+        if (winners) {
+          winners.innerHTML = renderTraderWinnersHTML() + `<div class="trader-complete">🥳🎉 Trimaksih Sampai Jumpa di Pertemuan Berikutnya 🥰💕</div>`;
+          setTimeout(function() { let complete = document.querySelector(".trader-complete"); if (complete) complete.scrollIntoView({ behavior: "smooth", block: "center" }); }, 150);
+        }
+        let traderCard = document.getElementById("traderDrawCard"); if (traderCard) traderCard.style.display = "none";
+      }, 1500);
+      return;
+    }
+    button.disabled = false; button.textContent = "🎰 MULAI UNDI LAGI";
+  }
+
+  function animasiPutaran() {
+    if (stopAnimasi) return;
+    let elapsed = Date.now() - slotStart, duration = 8000, detik = elapsed / 1000, delay;
+    if (detik < 4) delay = 80;
+    else if (detik < 5) delay = 80 + ((detik - 4) * 70);
+    else if (detik < 6) delay = 150 + ((detik - 5) * 100);
+    else if (detik < 7) delay = 250 + ((detik - 6) * 150);
+    else delay = 400 + ((detik - 7) * 400);
+
+    if (elapsed >= duration) { hentikanDanTampilkanPemenang(); return; }
+
+    let now = Date.now();
+    if (now - lastUpdate >= delay) {
+      lastUpdate = now;
+      let index = Math.floor(elapsed / delay) % available.length;
+      namaTerakhirDiDadu = available[index];
+      let container = dice.querySelector('.slot-text');
+      if (container) {
+        container.style.animation = 'none'; void container.offsetWidth; container.style.animation = 'slideNumber 0.15s linear forwards'; container.textContent = namaTerakhirDiDadu;
+      } else {
+        dice.innerHTML = `<div class="slot-text" style="font-size:28px;font-weight:bold;color:#a05ac8;padding:18px 8px;text-align:center;min-height:34px;display:flex;align-items:center;justify-content:center;">${esc(namaTerakhirDiDadu)}</div>`;
+      }
+    }
+    window.animasiTraderReq = requestAnimationFrame(animasiPutaran);
+  }
+
+  traderAudio.onerror = function() {
+    if (window.animasiTraderReq) cancelAnimationFrame(window.animasiTraderReq);
+    traderDrawing = false; dice.classList.remove("shaking"); button.disabled = false; button.textContent = "🎰 COBA LAGI";
+    status.textContent = "❌ Suara undian tidak dapat diputar."; result.innerHTML = `<p>⚠️ Audio tidak dapat dimuat.</p><div class="winner-name">Coba lagi</div>`;
+  };
+  traderAudio.oncanplay = function() {
+    if (!traderDrawing) return; traderAudio.oncanplay = null;
+    traderAudio.play().catch(function() {
+      if (window.animasiTraderReq) cancelAnimationFrame(window.animasiTraderReq);
+      traderDrawing = false; dice.classList.remove("shaking"); button.disabled = false; button.textContent = "🎰 COBA LAGI";
+      status.textContent = "❌ Audio tidak dapat diputar."; result.innerHTML = `<p>⚠️ Tekan tombol undian lagi.</p><div class="winner-name">🎰 Coba Lagi</div>`;
+    });
+    slotStart = Date.now(); lastUpdate = 0; window.animasiTraderReq = requestAnimationFrame(animasiPutaran);
+    setTimeout(function() { hentikanDanTampilkanPemenang(); }, 8000);
+  };
+  traderAudio.load();
+}
+
+/* UNDIAN PERSENTASE */
+let percentDrawData=null;
+function resetPercentDrawData() { if (typeof stopPercentDrawSound === "function") stopPercentDrawSound(); if (percentDrawData) { clearTimeout(percentDrawData.timer1); clearTimeout(percentDrawData.timer2); clearTimeout(percentDrawData.timer3); clearTimeout(percentDrawData.timer4); percentDrawData.drawToken = (percentDrawData.drawToken || 0) + 1; percentDrawData.drawing = false; percentDrawData.started = false; } percentDrawData = null; }
+function makePercent(){
+  let input=document.getElementById("pPeople"), c=document.getElementById("pFields"); if(!input||!c)return;
+  let n=Number(input.value); if(!n||n<1){ c.innerHTML=""; resetPercentDrawData(); return; } if(n>50){ input.value=50; n=50; } resetPercentDrawData();
+  let h=`<div class="person-card" id="pIntroCard"><div class="person-title">📊 Undi Persentase</div><p style="margin-top:5px;color:#8a808f">Masukkan nama peserta.</p></div><div id="pNameInputArea">`;
+  for(let i=1;i<=n;i++){ h+=`<div class="person-card"><div class="person-title">👤No. ${i}</div><input id="pn${i}" placeholder="Nama"></div>`; }
+  h+=`</div><div class="person-card" id="percentMaxArea" style="margin-top:12px"><div class="person-title">🎯 Persentase Maksimal</div><p style="margin:5px 0 10px;color:#8a808f;font-size:13px">Tentukan batas persentase terbesar yang boleh didapat satu Peserta.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"><button class="btn" onclick="selectPercentMax(30)">30%</button><button class="btn" onclick="selectPercentMax(40)">40%</button><button class="btn" onclick="selectPercentMax(50)">50%</button><button class="btn" onclick="selectPercentMax(60)">60%</button><button class="btn" onclick="selectPercentMax(70)">70%</button><button class="btn" onclick="selectPercentMax(80)">80%</button></div></div><div id="percentOptionArea" style="margin-top:12px"></div><div id="pResult" class="result hidden"></div><div id="percentResultsTable" style="margin-top:12px"></div>`;
+  c.innerHTML=h;
+}
+function equalPercentArray(n){ let result=[], base=Math.floor(100/n), remainder=100-base*n; for(let i=0;i<n;i++){ result.push(base+(i<remainder?1:0)); } return result; }
+function samePercentArray(a,b){ if(!a||!b||a.length!==b.length)return false; let x=a.slice().sort(function(a,b){return a-b}), y=b.slice().sort(function(a,b){return a-b}); for(let i=0;i<x.length;i++){ if(x[i]!==y[i])return false; } return true; }
+function addPercentOption(options,arr,maxPercent){ if(!arr||!arr.length)return; arr=arr.map(function(x){ return Math.round(x); }); for(let i=0;i<arr.length;i++){ if(arr[i]<1)arr[i]=1; } let total=arr.reduce(function(a,b){return a+b},0), guard=0; while(total!==100&&guard<1000){ guard++; if(total<100){ let candidates=[]; for(let i=0;i<arr.length;i++){ if(arr[i]<maxPercent)candidates.push(i); } if(!candidates.length)return; let index=candidates[Math.floor(Math.random()*candidates.length)]; arr[index]++; total++; }else{ let candidates=[]; for(let i=0;i<arr.length;i++){ if(arr[i]>1)candidates.push(i); } if(!candidates.length)return; let index=candidates[Math.floor(Math.random()*candidates.length)]; arr[index]--; total--; } } if(total!==100)return; if(arr.some(function(x){ return x<1||x>maxPercent; }))return; arr.sort(function(a,b){return b-a}); if(options.some(function(existing){ return samePercentArray(existing,arr); }))return; if(arr.length>2){ let spread=arr[0]-arr[arr.length-1], balanced=equalPercentArray(arr.length); let balancedSpread=Math.max.apply(null,balanced)-Math.min.apply(null,balanced); if(!samePercentArray(arr,balanced)&&spread<8)return; } options.push(arr); }
+function generatePercentOptions(n,maxPercent){ let options=[]; if(!maxPercent)maxPercent=80; if(Math.ceil(100/n)>maxPercent)return []; let balanced=equalPercentArray(n); if(balanced.every(function(x){ return x>=1&&x<=maxPercent; })){ addPercentOption(options,balanced,maxPercent); } for(let attempt=0;attempt<500;attempt++){ let arr=new Array(n).fill(1), first=maxPercent-Math.floor(Math.random()*Math.max(1,Math.floor(maxPercent*.15))); first=Math.max(first,Math.ceil(100/n)); first=Math.min(first,maxPercent); arr[0]=first; let remaining=100-first; for(let i=1;i<n;i++){ let left=n-i-1, minNeeded=left, maxHere=Math.min(maxPercent,remaining-minNeeded); if(i===n-1){ arr[i]=remaining; }else{ let value=Math.floor(1+Math.random()*Math.max(1,maxHere)); value=Math.max(1,Math.min(value,maxHere)); arr[i]=value; } remaining-=arr[i]; } if(remaining!==0)continue; addPercentOption(options,arr,maxPercent); if(options.length>=2)break; } for(let attempt=0;attempt<700;attempt++){ let arr=new Array(n).fill(1), average=100/n, first=Math.round(average+(maxPercent-average)*(.45+Math.random()*.25)); first=Math.max(first,Math.ceil(100/n)); first=Math.min(first,maxPercent); arr[0]=first; let remaining=100-first; for(let i=1;i<n;i++){ let left=n-i-1, minNeeded=left, maxHere=Math.min(maxPercent,remaining-minNeeded); if(i===n-1){ arr[i]=remaining; }else{ let value=Math.floor(1+Math.random()*Math.max(1,maxHere)); value=Math.max(1,Math.min(value,maxHere)); arr[i]=value; } remaining-=arr[i]; } if(remaining!==0)continue; addPercentOption(options,arr,maxPercent); if(options.length>=4)break; } for(let attempt=0;attempt<3000;attempt++){ if(options.length>=12)break; let arr=new Array(n).fill(1), remaining=100-n, guard=0; while(remaining>0&&guard<3000){ guard++; let index=Math.floor(Math.random()*n); if(arr[index]>=maxPercent)continue; arr[index]++; remaining--; } if(remaining!==0)continue; addPercentOption(options,arr,maxPercent); } for(let i=options.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)), temp=options[i]; options[i]=options[j]; options[j]=temp; } return options.slice(0,6); }
+function selectPercentMax(maxPercent) {
+  let totalInput = document.getElementById("mainSplitTotal"), peopleInput = document.getElementById("pPeople"); if (!totalInput || !peopleInput) return;
+  let t = parseMoney(totalInput.value), n = Number(peopleInput.value);
+  if (t <= 0) { alert("Masukkan Total Tagihan terlebih dahulu."); return; }
+  if (!n || n < 1) { alert("Jumlah peserta tidak valid."); return; }
+  let names = []; for (let i = 1; i <= n; i++) { let el = document.getElementById("pn" + i), name = el ? el.value.trim() : ""; if (!name) name = "Peserta " + i; names.push(name); }
+  let normalized = names.map(function(x) { return x.toLowerCase(); }); for (let i = 0; i < normalized.length; i++) { if (normalized.indexOf(normalized[i]) !== i) { alert("Nama tidak boleh sama. Periksa kembali semua nama."); return; } }
+  if (!percentDrawData) { percentDrawData = { total: t, n: n, names: names, maxPercent: null, percentages: null, optionList: [], index: 0, drawing: false, started: false, shuffledNames: null, shuffledPercentages: null, results: [], timer1: null, timer2: null, timer3: null, drawToken: 0 }; } else { percentDrawData.total = t; percentDrawData.n = n; percentDrawData.names = names; }
+  let data = percentDrawData; data.maxPercent = maxPercent; data.percentages = null; data.optionList = []; data.index = 0; data.drawing = false; data.started = false; data.shuffledNames = null; data.shuffledPercentages = null; data.results = [];
+  let area = document.getElementById("percentOptionArea"); if (!area) return;
+  if (Math.ceil(100 / n) > maxPercent) { area.innerHTML = `<div class="person-card" style="text-align:center;margin-top:12px"><div class="person-title">⚠️ Batas terlalu kecil</div><p style="color:#8a808f;margin:6px 0">Untuk ${n} Peserta, batas maksimal ${maxPercent}% belum cukup untuk mencapai total 100%.</p><p style="color:#a05ac8;font-weight:bold;margin:0">Coba pilih batas maksimal yang lebih tinggi.</p></div>`; return; }
+  let options = generatePercentOptions(n, maxPercent); data.optionList = options;
+  if (!options.length) { area.innerHTML = `<div class="person-card" style="text-align:center"><div class="person-title">⚠️ Belum menemukan pilihan</div><p style="color:#8a808f">Coba pilih persentase maksimal lainnya.</p></div>`; return; }
+  let html = `<div class="person-card"><div class="person-title">📊 Pilih Pembagian</div><p style="text-align:center;color:#8a808f;margin:7px 0 14px">Batas maksimal: <b style="color:#a05ac8">${maxPercent}%</b><br>Pilih pembagian yang paling kamu suka.</p>`;
+  options.forEach(function(option, index) { let text = option.map(function(v) { return v + "%"; }).join(" • "); html += `<button class="btn percent-option-btn" onclick="selectPercentOption(${index})" style="margin-top:8px;background:rgba(255,255,255,.85);color:#a05ac8;border:2px solid #eadcf1;width:100%">Pilihan ${index+1}<br><b style="font-size:16px">${text}</b></button>`; });
+  area.innerHTML = html + "</div>";
+}
+function selectPercentOption(index) {
+  let data = percentDrawData; if (!data || !data.optionList || !data.optionList[index] || data.drawing) return;
+  data.percentages = data.optionList[index].slice();
+  let testSound = new Audio("./sound/opening-persentase.mp3"); testSound.play().catch(function(err) {});
+  let totalBox = document.getElementById("mainSplitTotalBox"); let peopleBox = document.getElementById("pPeopleBox");
+  if (totalBox) totalBox.style.setProperty("display", "none", "important"); if (peopleBox) peopleBox.style.setProperty("display", "none", "important");
+  let text = data.percentages.map(function(v) { return v + "%"; }).join(" • ");
+  let nameArea = document.getElementById("pNameInputArea"), intro = document.getElementById("pIntroCard"), maxArea = document.getElementById("percentMaxArea"), optionArea = document.getElementById("percentOptionArea");
+  if (nameArea) foldElement(nameArea); if (intro) foldElement(intro); if (maxArea) foldElement(maxArea); if (optionArea) foldElement(optionArea);
+  let pResult = document.getElementById("pResult"); if (!pResult) return;
+  pResult.classList.remove("hidden");
+
+  pResult.innerHTML = `
+  <div class="percent-wrapper">
+    <div class="person-card" style="text-align:center;box-sizing:border-box;">
+      <div class="person-title">📊 Pembagian Terpilih</div>
+      <div style="font-size:22px;font-weight:bold;color:#a05ac8;margin-top:10px;">${text}</div>
+      <button id="percentStartBtn" class="btn" onclick="startPercentDraw()" style="margin-top:16px;width:100%;padding:14px;font-size:15px;">🎲 MULAI UNDI</button>
+      <div id="percentDrawResult" style="margin-top:16px"></div>
+    </div>
+  </div>`;
+
+  let resultTable = document.getElementById("percentResultsTable"); if (resultTable) resultTable.innerHTML = "";
+  window.scrollTo(0, 0);
+}
+function shuffleArray(arr){ let a=arr.slice(); for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)), temp=a[i]; a[i]=a[j]; a[j]=temp; } return a; }
+function startPercentDraw() {
+  let data = percentDrawData; if (!data) { alert("Data undian belum siap."); return; } if (data.drawing || data.started) return;
+  if (!data.names || !data.names.length) { alert("Data peserta belum lengkap."); return; } if (!data.percentages || !data.percentages.length) { alert("Pilih pembagian persentase terlebih dahulu."); return; }
+  ["pIntroCard", "pNameInputArea", "percentMaxArea", "percentOptionArea"].forEach(function(id) { let el = document.getElementById(id); if (el) el.style.display = "none"; });
+  let totalBox = document.getElementById("mainSplitTotalBox"); let peopleBox = document.getElementById("pPeopleBox");
+  if (totalBox) totalBox.style.setProperty("display", "none", "important"); if (peopleBox) peopleBox.style.setProperty("display", "none", "important");
+  data.started = true; data.drawing = true; data.index = 0; data.results = []; data.shuffledNames = shuffleArray(data.names); data.shuffledPercentages = shuffleArray(data.percentages);
+  let area = document.getElementById("percentDrawResult"), button = document.getElementById("percentStartBtn");
+  if (!area) { data.drawing = false; return; } if (button) { button.disabled = true; button.textContent = ""; button.style.display = "none"; }
+  area.innerHTML = `<div style="padding:20px 12px;text-align:center;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10);animation:splitResultJS .45s ease-out"><div style="font-size:46px;display:inline-block;animation:splitMachineJS .18s infinite alternate">🎲</div></div>`;
+  percentDrawSound(); data.timer1 = setTimeout(percentDrawNext, 0);
+}
+function startNextPercentDraw(){ let data = percentDrawData; if(!data || data.drawing || !data.started) return; if(!data.shuffledNames || !data.shuffledPercentages || data.index >= data.shuffledNames.length || data.index >= data.shuffledPercentages.length) return; data.drawing = true; percentDrawSound(); percentDrawNext(); }
+function renderPercentResults(){
+  let data=percentDrawData, area=document.getElementById("percentResultsTable"); if(!data||!area)return; if(!data.results||!data.results.length){ area.innerHTML=""; return; }
+  let rows=""; data.results.forEach(function(item){ rows+=`<tr><td style="padding:9px 5px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap">${item.round}</td><td style="padding:9px 5px;border-bottom:1px solid #eee;font-weight:bold;word-break:break-word">${esc(item.name)}</td><td style="padding:9px 5px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap;color:#a05ac8;font-weight:bold">${item.percent}%</td><td style="padding:9px 5px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-weight:bold">${formatRupiah(item.amount)}</td></tr>`; });
+  area.innerHTML=`<div style="border:1px solid #eadcf1;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)"><div style="padding:10px;font-weight:bold;font-size:13px;background:rgba(250,247,252,.85);color:#8a808f">📋 Nama Yang Sudah Keluar</div><div style="max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:8px 5px;background:rgba(255,255,255,.9);color:#8a808f;position:sticky;top:0">Putaran</th><th style="padding:8px 5px;background:rgba(255,255,255,.9);color:#8a808f;text-align:left;position:sticky;top:0">Nama</th><th style="padding:8px 5px;background:rgba(255,255,255,.9);color:#8a808f;position:sticky;top:0">%</th><th style="padding:8px 5px;background:rgba(255,255,255,.9);color:#8a808f;text-align:right;position:sticky;top:0">Bayar</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function percentDrawNext() {
+  let data = percentDrawData; let area = document.getElementById("percentDrawResult");
+  if (!data || !area) { if (data) data.drawing = false; return; } if (!data.shuffledNames || !data.shuffledPercentages) { data.drawing = false; return; }
+  if (data.index >= data.shuffledPercentages.length) { data.drawing = false; splitResultSound(); area.innerHTML = `<div style="padding:20px 12px;text-align:center;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10)"><div style="font-size:42px">🎉</div><h3 style="margin:8px 0 5px">Undian Selesai</h3><p style="margin:0;color:#8a808f">Semua peserta sudah mendapatkan persentase.</p></div>${renderPercentResults()}`; return; }
+  const drawToken = data.drawToken = (data.drawToken || 0) + 1; const drawIndex = data.index; const targetName = data.shuffledNames[drawIndex]; const targetPercent = Number(data.shuffledPercentages[drawIndex]);
+  if (!Number.isFinite(targetPercent)) { data.drawing = false; return; }
+  area.innerHTML = `<div style="padding:20px 12px;text-align:center;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10)"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div style="padding:14px 8px;border-radius:14px;background:rgba(247,243,250,.85);overflow:hidden"><div style="font-size:12px;color:#8a808f;margin-bottom:5px">👤 NAMA</div><div id="percentDrawNameBox" style="font-size:20px;font-weight:700;min-height:30px;display:flex;align-items:center;justify-content:center;word-break:break-word">🎲</div></div><div style="padding:14px 8px;border-radius:14px;background:rgba(247,243,250,.85);overflow:hidden"><div style="font-size:12px;color:#8a808f;margin-bottom:5px">🎯 PERSENTASE</div><div id="percentDrawPercentBox" style="font-size:24px;font-weight:700;min-height:30px;display:flex;align-items:center;justify-content:center">🎲</div></div></div></div>`;
+  const nameBox = document.getElementById("percentDrawNameBox"); const percentBox = document.getElementById("percentDrawPercentBox");
+  if (!nameBox || !percentBox) { data.drawing = false; return; }
+  const start = Date.now(); const nameDuration = 10000; const percentDuration = 17000;
+  function roll() {
+    if (data.drawToken !== drawToken || data.index !== drawIndex || !data.drawing) return;
+    const elapsed = Date.now() - start;
+    if (elapsed >= nameDuration) { nameBox.textContent = targetName; nameBox.style.transform = "scale(1.08)"; nameBox.style.transition = "transform .2s ease"; } else { const remainingNames = data.shuffledNames.slice(drawIndex); const randomName = remainingNames[Math.floor(Math.random() * remainingNames.length)]; nameBox.textContent = randomName; nameBox.style.transform = "translateY(" + (Math.random() * 8 - 4) + "px)"; }
+    if (elapsed >= percentDuration) { percentBox.textContent = targetPercent + "%"; percentBox.style.transform = "scale(1.12)"; percentBox.style.transition = "transform .2s ease"; } else { const remainingPercentages = data.shuffledPercentages.slice(drawIndex); const randomPercent = remainingPercentages[Math.floor(Math.random() * remainingPercentages.length)]; percentBox.textContent = String(randomPercent) + "%"; percentBox.style.transform = "translateY(" + (Math.random() * 8 - 4) + "px)"; }
+    if (elapsed < percentDuration) { let delay; if (elapsed < 5000) { delay = 80; } else if (elapsed < 10000) { delay = 110; } else if (elapsed < 14000) { delay = 140; } else if (elapsed < 15000) { delay = 180; } else if (elapsed < 16000) { delay = 250; } else { delay = 400; } data.timer2 = setTimeout(roll, delay); return; }
+    nameBox.textContent = targetName; percentBox.textContent = targetPercent + "%";
+    data.timer3 = setTimeout(function() {
+      if (data.drawToken !== drawToken || data.index !== drawIndex || !data.drawing) return;
+      area.innerHTML = `<div style="padding:20px 12px;text-align:center;border-radius:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 15px rgba(120,90,140,.10);animation:splitResultJS .45s ease-out"><div style="font-size:42px;margin-bottom:6px">🎉</div><div style="font-size:13px;color:#8a808f;margin-bottom:6px">HASIL UNDIAN</div><div style="font-size:25px;font-weight:700;margin-bottom:5px;overflow-wrap:anywhere">${esc(targetName)}</div><div style="font-size:34px;font-weight:800">${targetPercent}%</div></div>`;
+      const elapsedNow = Date.now() - start; const remain = Math.max(0, 18000 - elapsedNow);
+      data.timer4 = setTimeout(function() {
+        if (data.drawToken !== drawToken || data.index !== drawIndex || !data.drawing) return;
+        stopPercentDrawSound(); splitResultSound();
+        data.results.push({ round: drawIndex + 1, name: targetName, percent: targetPercent, amount: Math.round(Number(data.total) * targetPercent / 100) });
+        data.index++; data.drawing = false; renderPercentResults();
+        if (data.index < data.shuffledPercentages.length) { area.innerHTML += `<div style="margin-top:12px;text-align:center"><button class="btn" onclick="startNextPercentDraw()">🎲 UNDI BERIKUTNYA</button></div>`; return; }
+        const pResult = document.getElementById("pResult"); if (!pResult) return;
+        let summaryRows = ""; data.results.forEach(function(item) { summaryRows += `<div style="padding:14px;margin-top:10px;border-radius:12px;background:rgba(255,240,247,.85);text-align:left"><div style="font-size:17px;font-weight:bold;color:#a05ac8;overflow-wrap:anywhere">${esc(item.name)}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:#8a808f;font-size:13px"><span>Persentase</span><strong>${item.percent}%</strong></div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:14px"><span>Nominal pembayaran</span><strong style="color:#a05ac8;text-align:right">${formatRupiah(item.amount)}</strong></div></div>`; });
+        pResult.innerHTML = `<div class="person-card" style="padding:20px 14px;border-radius:20px;background:linear-gradient(145deg,rgba(255,240,247,.85),rgba(243,239,255,.85));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 5px 20px rgba(120,90,140,.12);box-sizing:border-box"><div style="text-align:center"><div style="font-size:45px">🎉💰🎉</div><h2 style="color:#a05ac8;margin:10px 0">RINGKASAN TAGIHAN</h2><p style="margin:0;color:#8a808f">Semua undian telah selesai!</p><div style="padding:16px 10px;border-radius:14px;background:rgba(255,255,255,.85);margin-top:16px"><div style="color:#8a808f;font-size:13px">TOTAL TAGIHAN</div><div style="font-size:25px;font-weight:bold;color:#a05ac8;margin-top:6px">${formatRupiah(Number(data.total))}</div></div></div><h3 style="margin:22px 0 8px;color:#a05ac8">📋 RINCIAN PEMBAYARAN</h3>${summaryRows}<div style="margin-top:18px;padding:16px 10px;border-radius:14px;background:rgba(255,255,255,.85);text-align:center"><div style="font-size:28px">💕</div><div style="font-weight:bold;color:#a05ac8;margin-top:6px">Pembagian Tagihan Selesai!</div><div style="color:#8a808f;font-size:12px;margin-top:5px">Setiap peserta membayar sesuai persentase hasil undian.</div></div></div>`;
+        saveSplitHistory({ mode: "🎯 Undi Persentase", date: new Date().toISOString(), summary: "Total tagihan: " + formatRupiah(Number(data.total)) + " | Hasil: " + data.results.map(function(item) { return item.name + " (" + item.percent + "%): " + formatRupiah(item.amount); }).join(", ") });
+        const oldResultsTable = document.getElementById("percentResultsTable"); if (oldResultsTable) { oldResultsTable.innerHTML = ""; oldResultsTable.style.display = "none"; }
+        setTimeout(function() { pResult.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300);
+      }, remain);
+    }, 800);
+  }
+  data.timer1 = setTimeout(roll, 0);
+}
+
+/* =========================================
+   KALKULATOR HEMAT
+   ========================================= */
+let hematActive = JSON.parse(localStorage.getItem("catatHitungHematActive") || "null");
+let hematHistory = JSON.parse(localStorage.getItem("catatHitungHematHistory") || "[]");
+let hematMode = "percent";
+let hematResultExpanded = false;
+
+function toggleHematFold() {
+  hematResultExpanded = !hematResultExpanded;
+  document.getElementById("hematExpandedView").classList.toggle("hidden", !hematResultExpanded);
+  document.getElementById("hematCollapsedView").classList.toggle("hidden", hematResultExpanded);
+  document.getElementById("hematResultToggleIcon").textContent = hematResultExpanded ? "▼" : "▶";
+}
+function saveHemat() {
+  localStorage.setItem("catatHitungHematActive", JSON.stringify(hematActive));
+  localStorage.setItem("catatHitungHematHistory", JSON.stringify(hematHistory));
+}
+function setHematMode(mode) {
+  hematMode = mode;
+  document.getElementById("hematModePercentBtn").classList.toggle("active", mode === "percent");
+  document.getElementById("hematModeNominalBtn").classList.toggle("active", mode === "nominal");
+  document.getElementById("hematPercentWrap").classList.toggle("hidden", mode !== "percent");
+  document.getElementById("hematNominalWrap").classList.toggle("hidden", mode !== "nominal");
+}
+function startHematTarget() {
+  let saldo = parseMoney(document.getElementById("hematSaldo").value), startDate = document.getElementById("hematStartDate").value, endDate = document.getElementById("hematEndDate").value;
+  if (saldo <= 0) { alert("Masukkan saldo awal terlebih dahulu."); return; }
+  if (!startDate) { alert("Pilih tanggal mulai target."); return; }
+  if (!endDate) { alert("Pilih tanggal selesai target."); return; }
+  if (endDate <= startDate) { alert("Tanggal selesai harus setelah tanggal mulai."); return; }
+  let hematAmount = 0;
+  if (hematMode === "percent") {
+    let pct = Number(document.getElementById("hematPercent").value);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) { alert("Persentase hemat harus > 0 dan ≤ 100."); return; }
+    hematAmount = Math.round(saldo * pct / 100);
+  } else { hematAmount = parseMoney(document.getElementById("hematNominal").value); }
+  if (hematAmount <= 0) { alert("Nominal hemat harus lebih dari 0."); return; }
+  if (hematAmount >= saldo) { alert("Nominal hemat tidak boleh ≥ saldo."); return; }
+  if (hematActive) {
+    if (!confirm("Masih ada target aktif yang berjalan. Selesaikan dulu atau ganti dengan target baru?")) return;
+    finishHematTargetManual(true);
+  }
+  hematActive = { saldoAwal: saldo, hematTarget: hematAmount, startDate: startDate, endDate: endDate, createdAt: new Date().toISOString(), expenses: [] };
+  saveHemat();
+  document.getElementById("hematSaldo").value = ""; document.getElementById("hematPercent").value = ""; document.getElementById("hematNominal").value = "";
+  document.getElementById("hematInputBody").style.display = "none"; document.getElementById("hematInputIcon").textContent = "▶";
+  renderHemat();
+  document.getElementById("hematResultCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function finishHematTargetManual(silent) {
+  if (!hematActive) return;
+  if (!silent) { if (!confirm("Selesaikan target ini sekarang? Target akan dipindah ke Riwayat.")) return; }
+  let calc = calcHemat();
+  let record = { id: Date.now(), saldoAwal: hematActive.saldoAwal, hematTarget: hematActive.hematTarget, startDate: hematActive.startDate, endDate: hematActive.endDate, finishedAt: todayISO(), totalSpent: calc ? calc.totalSpent : 0, sisaDana: calc ? calc.sisaDana : 0, status: calc && calc.overBudget ? "Over" : "Aman", expenses: hematActive.expenses.slice() };
+  hematHistory.unshift(record); hematActive = null; saveHemat(); renderHemat();
+}
+function calcHemat() {
+  if (!hematActive) return null;
+  let today = todayISO(), totalDays = Math.max(1, daysBetween(hematActive.startDate, hematActive.endDate) + 1);
+  let danaBebas = hematActive.saldoAwal - hematActive.hematTarget, targetHarianPaten = Math.max(0, danaBebas / totalDays);
+  let daysUsed = Math.max(0, daysBetween(hematActive.startDate, today) + 1); if (daysUsed > totalDays) daysUsed = totalDays;
+  let daysLeft = Math.max(1, totalDays - daysUsed + 1), totalSpent = hematActive.expenses.reduce((s, x) => s + x.amount, 0);
+  let sisaDana = hematActive.saldoAwal - hematActive.hematTarget - totalSpent;
+  let todaySpent = hematActive.expenses.filter(x => x.date === today).reduce((s, x) => s + x.amount, 0);
+  let remainingDailyLimit = targetHarianPaten - todaySpent;
+  return { totalDays, daysUsed, daysLeft, totalSpent, sisaDana, targetHarianPaten, todaySpent, remainingDailyLimit, overBudget: sisaDana < 0, isFinished: today > hematActive.endDate };
+}
+function checkAutoFinish() {
+  if (!hematActive) return;
+  let calc = calcHemat();
+  if (calc && calc.isFinished) {
+    let record = { id: Date.now(), saldoAwal: hematActive.saldoAwal, hematTarget: hematActive.hematTarget, startDate: hematActive.startDate, endDate: hematActive.endDate, finishedAt: hematActive.endDate, totalSpent: calc.totalSpent, sisaDana: calc.sisaDana, status: calc.overBudget ? "Over" : "Aman", expenses: hematActive.expenses.slice() };
+    hematHistory.unshift(record); hematActive = null; saveHemat();
+  }
+}
+function addHematExpense() {
+  if (!hematActive) { alert("Belum ada target aktif."); return; }
+  let amount = parseMoney(document.getElementById("hematExpenseAmount").value), note = document.getElementById("hematExpenseNote").value.trim(), dateInput = document.getElementById("hematExpenseDate").value;
+  if (amount <= 0) { alert("Masukkan nominal pengeluaran."); return; }
+  let calc = calcHemat(), today = todayISO(), expenseDate = dateInput || today;
+  if (expenseDate < hematActive.startDate || expenseDate > hematActive.endDate) { alert("Tanggal pengeluaran harus di dalam periode target (" + dateID(hematActive.startDate) + " – " + dateID(hematActive.endDate) + ")."); return; }
+  hematActive.expenses.unshift({ id: Date.now(), date: expenseDate, amount: amount, note: note || "Pengeluaran", budgetAtTime: calc ? calc.targetHarianPaten : 0 });
+  saveHemat();
+  if (expenseDate === today && calc && calc.targetHarianPaten > 0) {
+    let todaySpentAfter = hematActive.expenses.filter(x => x.date === today).reduce((s, x) => s + x.amount, 0);
+    if (todaySpentAfter > calc.targetHarianPaten) { alert("⚠️ Pengeluaran hari ini melebihi target harian (" + formatRupiah(calc.targetHarianPaten) + ").\nSisa dana otomatis menyesuaikan."); }
+  }
+  document.getElementById("hematExpenseAmount").value = ""; document.getElementById("hematExpenseNote").value = ""; document.getElementById("hematExpenseDate").value = today;
+  renderHemat();
+}
+function deleteHematExpense(id) {
+  if (!hematActive) return; if (!confirm("Hapus pengeluaran ini?")) return;
+  hematActive.expenses = hematActive.expenses.filter(x => x.id !== id); saveHemat(); renderHemat();
+}
+function deleteHematHistory(id) {
+  if (!confirm("Hapus riwayat target ini?")) return;
+  let openPeriods = []; document.querySelectorAll(".finance-period.open").forEach(el => openPeriods.push(el.id));
+  hematHistory = hematHistory.filter(x => x.id !== id); saveHemat(); renderHematHistory();
+  openPeriods.forEach(periodId => { let el = document.getElementById(periodId); if (el) el.classList.add("open"); });
+}
+function renderHemat() {
+  checkAutoFinish();
+  let resultCard = document.getElementById("hematResultCard"), expenseCard = document.getElementById("hematExpenseCard"), todayCard = document.getElementById("hematTodayCard");
+  if (!hematActive) {
+    if (resultCard) resultCard.classList.add("hidden"); if (expenseCard) expenseCard.classList.add("hidden"); if (todayCard) todayCard.classList.add("hidden");
+    renderHematHistory(); return;
+  }
+  let calc = calcHemat(), today = todayISO();
+  if (resultCard) resultCard.classList.remove("hidden"); if (expenseCard) expenseCard.classList.remove("hidden"); if (todayCard) todayCard.classList.remove("hidden");
+  let dateEl = document.getElementById("hematExpenseDate"); if (dateEl && !dateEl.value) dateEl.value = today;
+  document.getElementById("hematRemainingValue").textContent = formatRupiah(calc.sisaDana);
+  let sisaHariDinamis = Math.max(1, calc.daysLeft), dynamicCalc = calc.sisaDana / sisaHariDinamis;
+  document.getElementById("hematDynamicCalc").textContent = formatRupiah(dynamicCalc);
+  let formattedRemaining = formatRupiah(calc.remainingDailyLimit), limitColor = calc.remainingDailyLimit < 0 ? "#ed6587" : "#a05ac8";
+  let dailyBudgetEl = document.getElementById("hematDailyBudget"), collapsedEl = document.getElementById("hematDailyBudgetCollapsed");
+  if (dailyBudgetEl) { dailyBudgetEl.textContent = formattedRemaining; dailyBudgetEl.style.color = limitColor; }
+  if (collapsedEl) { collapsedEl.textContent = formattedRemaining; collapsedEl.style.color = limitColor; }
+  let daysLeftEl = document.getElementById("hematDaysLeft"); if (daysLeftEl) daysLeftEl.textContent = `Terpakai ${formatRupiah(calc.todaySpent)} hari ini • Sisa ${calc.daysLeft} hari`;
+  let summary = document.getElementById("hematSummaryText"); summary.textContent = "Periode " + dateID(hematActive.startDate) + " – " + dateID(hematActive.endDate); summary.style.color = calc.overBudget ? "#ed6587" : "#7b7184";
+  renderHematTodayExpenses(); renderHematHistory();
+}
+function renderHematTodayExpenses() {
+  let list = document.getElementById("hematTodayList"); if (!list) return;
+  if (!hematActive || !hematActive.expenses.length) { list.innerHTML = '<div class="finance-history-empty">Belum ada pengeluaran di target ini 💕</div>'; return; }
+  let groups = {}, order = [];
+  let sorted = hematActive.expenses.slice().sort((a, b) => { if (a.date === b.date) return b.id - a.id; return b.date.localeCompare(a.date); });
+  sorted.forEach(x => { if (!groups[x.date]) { groups[x.date] = []; order.push(x.date); } groups[x.date].push(x); });
+  let today = todayISO(), calc = calcHemat(), html = "";
+  order.forEach(d => {
+    let items = groups[d], dayTotal = items.reduce((s, x) => s + x.amount, 0), isToday = d === today;
+    let over = calc && calc.targetHarianPaten > 0 && dayTotal > calc.targetHarianPaten;
+    let overBadge = over ? ' <span style="color:#ed6587;font-size:11px">⚠️ over</span>' : "", todayBadge = isToday ? ' <span style="color:#a05ac8;font-size:11px">• hari ini</span>' : "";
+    html += `<div class="hemat-today-day"><div class="hemat-today-day-head"><span>📅 ${dateID(d)}${todayBadge}${overBadge}</span><span class="hemat-today-total">-${formatRupiah(dayTotal)}</span></div><div class="hemat-today-items">`;
+    items.forEach(x => { html += `<div class="hemat-today-item"><div class="info"><div class="title">${esc(x.note)}</div><small>Target harian saat itu: ${formatRupiah(x.budgetAtTime || 0)}</small></div><div class="amount">-${formatRupiah(x.amount)}</div><button class="delete" onclick="deleteHematExpense(${x.id})">🗑️</button></div>`; });
+    html += `</div></div>`;
+  });
+  list.innerHTML = html;
+}
+function renderHematHistory() {
+  let list = document.getElementById("hematHistoryList"); if (!list) return;
+  if (!hematHistory.length) { list.innerHTML = '<div class="finance-history-empty">Belum ada target yang selesai 💕</div>'; return; }
+  list.innerHTML = hematHistory.map((h, i) => {
+    let over = h.status === "Over", durasi = daysBetween(h.startDate, h.endDate) + 1;
+    let expensesRows = (h.expenses || []).map(x => `<div class="transaction"><div class="info"><div class="title">💸 ${esc(x.note)}</div><small>${dateID(x.date)} • Target harian saat itu ${formatRupiah(x.budgetAtTime || 0)}</small></div><div class="amount out">-${formatRupiah(x.amount)}</div></div>`).join("") || '<div class="finance-history-empty" style="padding:10px">Tidak ada pengeluaran</div>';
+    return `<div class="finance-period" id="hematHistPeriod-${h.id}"><button class="finance-period-head" onclick="this.closest('.finance-period').classList.toggle('open')"><div class="finance-period-title"><span>📅 ${dateID(h.startDate)} – ${dateID(h.endDate)}</span><span class="finance-period-arrow">▼</span></div><div class="finance-period-summary"><div class="finance-period-box balance"><small>TARGET HEMAT</small><strong>${formatRupiah(h.hematTarget)}</strong></div><div class="finance-period-box expense"><small>TOTAL KELUAR</small><strong>${formatRupiah(h.totalSpent)}</strong></div><div class="finance-period-box count"><small>STATUS</small><strong style="color:${over ? "#ed6587" : "#39a96b"}">${h.status}</strong></div></div><div style="margin-top:8px;font-size:12px;color:#8a808f">Durasi ${durasi} hari • Sisa dana ${formatRupiah(h.sisaDana)} • Selesai ${dateID(h.finishedAt)}</div></button><div class="finance-period-body">${expensesRows}<button class="btn" style="background:linear-gradient(135deg,#ffb6d5,#ff8fb1);color:#7a1e44;margin-top:12px" onclick="event.stopPropagation();deleteHematHistory(${h.id})">🗑️ Hapus Riwayat</button></div></div>`;
+  }).join("");
+}
+document.addEventListener("visibilitychange", function () { if (!document.hidden && typeof renderHemat === "function") renderHemat(); });
+window.addEventListener("focus", function () { if (typeof renderHemat === "function") renderHemat(); });
+
+/* =========================================
+   CATATAN KEUANGAN
+   ========================================= */
+let financeType="income",transactions=JSON.parse(localStorage.getItem("catatHitungTransactions")||"[]"),financeHistoryMode="daily";
+function setFinanceType(t){ financeType=t; document.getElementById("incomeBtn").classList.toggle("active",t==="income"); document.getElementById("expenseBtn").classList.toggle("active",t==="expense"); }
+function addTransaction(){
+  let a=parseMoney(document.getElementById("financeAmount").value),n=document.getElementById("financeNote").value.trim();
+  if(a<=0||!n){alert("Lengkapi jumlah dan keterangan.");return}
+  let dateVal = document.getElementById("financeDate").value || todayISO();
+  transactions.unshift({id:Date.now(),type:financeType,amount:a,note:n,date:dateVal});
+  localStorage.setItem("catatHitungTransactions",JSON.stringify(transactions));
+  document.getElementById("financeAmount").value=""; document.getElementById("financeNote").value=""; document.getElementById("financeDate").value = todayISO();
+  renderTransactions();
+}
+function deleteTransaction(id) {
+  let openPeriods = []; document.querySelectorAll(".finance-period.open").forEach(el => openPeriods.push(el.id));
+  transactions = transactions.filter(x => x.id !== id); localStorage.setItem("catatHitungTransactions", JSON.stringify(transactions));
+  renderTransactions(); openPeriods.forEach(periodId => { let el = document.getElementById(periodId); if (el) el.classList.add("open"); });
+}
+function setFinanceHistoryMode(mode){ financeHistoryMode=mode; document.getElementById("historyTabDaily").classList.toggle("active",mode==="daily"); document.getElementById("historyTabWeekly").classList.toggle("active",mode==="weekly"); document.getElementById("historyTabMonthly").classList.toggle("active",mode==="monthly"); renderTransactions(); }
+function financeMonthName(month){ let n=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return n[Number(month)-1]||month; }
+function financeWeekStart(s){ let d=new Date(s+"T00:00:00"),day=d.getDay(); d.setDate(d.getDate()+(day===0?-6:1-day)); return d.toISOString().slice(0,10); }
+function financeAddDays(s,days){ let d=new Date(s+"T00:00:00"); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function financeFormatPeriodTitle(key){ if(financeHistoryMode==="daily")return dateID(key); if(financeHistoryMode==="weekly")return dateID(key)+" – "+dateID(financeAddDays(key,6)); let p=key.split("-"); return financeMonthName(p[1])+" "+p[0]; }
+function financeGetGroupKey(x){ if(financeHistoryMode==="daily")return x.date; if(financeHistoryMode==="weekly")return financeWeekStart(x.date); return x.date.slice(0,7); }
+function financeRenderTransaction(x){ return `<div class="transaction"><div class="info"><div class="title">${x.type==="income"?"💚":"💗"} ${esc(x.note)}</div><small>${dateID(x.date)}</small></div><div class="amount ${x.type==="income"?"in":"out"}">${x.type==="income"?"+":"-"}${formatRupiah(x.amount)}</div><button class="delete" onclick="event.stopPropagation();deleteTransaction(${x.id})">🗑️</button></div>`; }
+function financeRenderGroup(key,list,index){ let income=0,expense=0; list.forEach(x=>x.type==="income"?income+=x.amount:expense+=x.amount); let detail=list.map(financeRenderTransaction).join(""); return `<div class="finance-period" id="financePeriod-${key}"><button class="finance-period-head" onclick="this.closest('.finance-period').classList.toggle('open')"><div class="finance-period-title"><span>${financeHistoryMode==="daily"?"📅":financeHistoryMode==="weekly"?"📆":"🗓️"} ${financeFormatPeriodTitle(key)}</span><span class="finance-period-arrow">▼</span></div><div class="finance-period-summary"><div class="finance-period-box income"><small>PEMASUKAN</small><strong>${formatRupiah(income)}</strong></div><div class="finance-period-box expense"><small>PENGELUARAN</small><strong>${formatRupiah(expense)}</strong></div><div class="finance-period-box balance"><small>SALDO BERSIH</small><strong>${formatRupiah(income-expense)}</strong></div></div></button><div class="finance-period-body">${detail}</div></div>`; }
+function renderTransactions(){
+  let i=0,e=0; transactions.forEach(x=>x.type==="income"?i+=x.amount:e+=x.amount);
+  document.getElementById("totalBalance").textContent=formatRupiah(i-e);
+  let list=document.getElementById("transactionList");
+  if(!transactions.length){ list.innerHTML=`<div class="finance-history-empty">Belum ada catatan 💕</div>`; return; }
+  let sorted=transactions.slice().sort((a,b)=>a.date===b.date?b.id-a.id:b.date.localeCompare(a.date)),groups={},order=[];
+  sorted.forEach(x=>{ let key=financeGetGroupKey(x); if(!groups[key]){groups[key]=[];order.push(key)} groups[key].push(x); });
+  list.innerHTML=order.map((key,index)=>financeRenderGroup(key,groups[key],index)).join("");
+}
+
+/* =========================================
+   UANG KAS
+   ========================================= */
+let cashType="income",cashTransactions=JSON.parse(localStorage.getItem("catatHitungCash")||"[]"),cashHistoryMode="daily";
+function setCashType(t){ cashType=t; document.getElementById("cashIncomeBtn").classList.toggle("active",t==="income"); document.getElementById("cashExpenseBtn").classList.toggle("active",t==="expense"); }
+function addCashTransaction(){
+  let a=parseMoney(document.getElementById("cashAmount").value),n=document.getElementById("cashNote").value.trim();
+  if(a<=0||!n){alert("Lengkapi jumlah dan keterangan.");return}
+  let dateVal = document.getElementById("cashDate").value || todayISO();
+  cashTransactions.unshift({id:Date.now(),type:cashType,amount:a,note:n,date:dateVal});
+  localStorage.setItem("catatHitungCash",JSON.stringify(cashTransactions));
+  document.getElementById("cashAmount").value=""; document.getElementById("cashNote").value=""; document.getElementById("cashDate").value = todayISO();
+  renderCash();
+}
+function deleteCashTransaction(id) {
+  let openPeriods = []; document.querySelectorAll(".finance-period.open").forEach(el => openPeriods.push(el.id));
+  cashTransactions = cashTransactions.filter(x => x.id !== id); localStorage.setItem("catatHitungCash", JSON.stringify(cashTransactions));
+  renderCash(); openPeriods.forEach(periodId => { let el = document.getElementById(periodId); if (el) el.classList.add("open"); });
+}
+function setCashHistoryMode(mode){
+  cashHistoryMode=mode;
+  document.getElementById("cashHistoryTabDaily").classList.toggle("active",mode==="daily");
+  document.getElementById("cashHistoryTabWeekly").classList.toggle("active",mode==="weekly");
+  document.getElementById("cashHistoryTabMonthly").classList.toggle("active",mode==="monthly");
+  renderCash();
+}
+function cashFormatPeriodTitle(key){
+  if(cashHistoryMode==="daily")return dateID(key);
+  if(cashHistoryMode==="weekly")return dateID(key)+" – "+dateID(financeAddDays(key,6));
+  let p=key.split("-"); return financeMonthName(p[1])+" "+p[0];
+}
+function cashGetGroupKey(x){
+  if(cashHistoryMode==="daily")return x.date;
+  if(cashHistoryMode==="weekly")return financeWeekStart(x.date);
+  return x.date.slice(0,7);
+}
+function cashRenderTransaction(x){
+  return `<div class="transaction"><div class="info"><div class="title">${x.type==="income"?"💚":"💗"} ${esc(x.note)}</div><small>${dateID(x.date)}</small></div><div class="amount ${x.type==="income"?"in":"out"}">${x.type==="income"?"+":"-"}${formatRupiah(x.amount)}</div><button class="delete" onclick="event.stopPropagation();deleteCashTransaction(${x.id})">🗑️</button></div>`;
+}
+function cashRenderGroup(key,list,index){
+  let income=0,expense=0; list.forEach(x=>x.type==="income"?income+=x.amount:expense+=x.amount);
+  let detail=list.map(cashRenderTransaction).join("");
+  return `<div class="finance-period" id="cashPeriod-${key}"><button class="finance-period-head" onclick="this.closest('.finance-period').classList.toggle('open')"><div class="finance-period-title"><span>${cashHistoryMode==="daily"?"📅":cashHistoryMode==="weekly"?"📆":"🗓️"} ${cashFormatPeriodTitle(key)}</span><span class="finance-period-arrow">▼</span></div><div class="finance-period-summary"><div class="finance-period-box income"><small>MASUK</small><strong>${formatRupiah(income)}</strong></div><div class="finance-period-box expense"><small>KELUAR</small><strong>${formatRupiah(expense)}</strong></div><div class="finance-period-box balance"><small>SALDO</small><strong>${formatRupiah(income-expense)}</strong></div></div></button><div class="finance-period-body">${detail}</div></div>`;
+}
+function renderCash(){
+  let i=0,e=0; cashTransactions.forEach(x=>x.type==="income"?i+=x.amount:e+=x.amount);
+  let elTotal = document.getElementById("totalCashBalance"); if(elTotal) elTotal.textContent=formatRupiah(i-e);
+  let list=document.getElementById("cashTransactionList"); if(!list) return;
+  if(!cashTransactions.length){ list.innerHTML=`<div class="finance-history-empty">Belum ada catatan Uang Kas 💕</div>`; return; }
+  let sorted=cashTransactions.slice().sort((a,b)=>a.date===b.date?b.id-a.id:b.date.localeCompare(a.date)),groups={},order=[];
+  sorted.forEach(x=>{ let key=cashGetGroupKey(x); if(!groups[key]){groups[key]=[];order.push(key)} groups[key].push(x); });
+  list.innerHTML=order.map((key,index)=>cashRenderGroup(key,groups[key],index)).join("");
+}
+
+/* =========================================
+   TABUNGAN IMPIAN
+   ========================================= */
+let goals=JSON.parse(localStorage.getItem("catatHitungGoals")||"[]");
+function addGoal(){ let name=document.getElementById("goalName").value.trim(),target=parseMoney(document.getElementById("goalTarget").value),saved=parseMoney(document.getElementById("goalSaved").value),deadline=document.getElementById("goalDeadline").value; if(!name||target<=0||!deadline){alert("Lengkapi data tabungan impian.");return} goals.unshift({id:Date.now(),name,target,saved,deadline}); localStorage.setItem("catatHitungGoals",JSON.stringify(goals)); document.getElementById("goalName").value=""; document.getElementById("goalTarget").value=""; document.getElementById("goalSaved").value=""; document.getElementById("goalDeadline").value=""; renderGoals(); }
+function addGoalMoney(id){ let amount=prompt("Berapa uang yang ingin ditambahkan?"); if(amount===null)return; let n=parseMoney(amount); if(n<=0)return; let g=goals.find(x=>x.id===id); if(!g)return; g.saved=Math.min(g.target,g.saved+n); localStorage.setItem("catatHitungGoals",JSON.stringify(goals)); renderGoals(); }
+function deleteGoal(id){ if(!confirm("Hapus tabungan impian ini?"))return; goals=goals.filter(x=>x.id!==id); localStorage.setItem("catatHitungGoals",JSON.stringify(goals)); renderGoals(); }
+function renderGoals(){
+  let list = document.getElementById("goalList"); if(!list) return; if(!goals.length){ list.innerHTML = '<div class="empty">Belum ada impian 🌷</div>'; return; }
+  let today = new Date();
+  list.innerHTML = goals.map(g => {
+    let percent = Math.min(100, g.saved / g.target * 100), deadline = new Date(g.deadline + "T23:59:59"), days = Math.max(1, Math.ceil((deadline - today) / 86400000)), remaining = Math.max(0, g.target - g.saved), daily = remaining / days;
+    return `<div class="goal-card"><button type="button" class="goal-fold-button" onclick="toggleGoalCard(${g.id})" aria-expanded="false"><div class="goal-top"><div class="goal-main-info"><div class="goal-name">🌸 ${esc(g.name)}</div><div class="goal-target">Target: ${formatRupiah(g.target)}</div></div><span class="goal-fold-icon" id="goalFoldIcon-${g.id}">▶</span></div><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div><div class="progress-text"><span>${percent.toFixed(1)}%</span></div></div></button><div class="goal-details hidden" id="goalDetails-${g.id}"><div class="goal-saved-summary">💰 Terkumpul: <strong>${formatRupiah(g.saved)}</strong></div><div class="goal-money"><div class="goal-money-box"><small>Kurang</small><strong>${formatRupiah(remaining)}</strong></div><div class="goal-money-box"><small>Per Hari</small><strong>${formatRupiah(daily)}</strong></div></div><div class="goal-info">📅 Target ${dateID(g.deadline)}<br>Perkiraan kebutuhan ${formatRupiah(daily)} per hari.</div><div class="goal-actions"><button type="button" class="goal-add" onclick="addGoalMoney(${g.id})">➕ Tambah</button><button type="button" class="goal-delete" onclick="deleteGoal(${g.id})">🗑️ Hapus</button></div>${g.saved >= g.target ? `<div class="goal-complete">🎉 Impian tercapai!</div>` : ""}</div></div>`;
+  }).join("");
+}
+function toggleGoalCard(id){ let details = document.getElementById("goalDetails-" + id), icon = document.getElementById("goalFoldIcon-" + id); if(!details) return; details.classList.toggle("hidden"); let isOpen = !details.classList.contains("hidden"); if(icon){ icon.textContent = isOpen ? "▼" : "▶"; } let button = icon ? icon.closest(".goal-fold-button") : null; if(button){ button.setAttribute("aria-expanded", String(isOpen)); } }
+
+/* =========================================
+   JURNAL HARIAN
+   ========================================= */
+let journals=JSON.parse(localStorage.getItem("catatHitungJournals")||"[]");
+function addJournal(){ let date=document.getElementById("journalDate").value||todayISO(),title=document.getElementById("journalTitle").value.trim(),text=document.getElementById("journalText").value.trim(); if(!title||!text){alert("Isi judul dan jurnal terlebih dahulu.");return} journals.unshift({id:Date.now(),date,title,text}); localStorage.setItem("catatHitungJournals",JSON.stringify(journals)); document.getElementById("journalTitle").value=""; document.getElementById("journalText").value=""; renderJournals(); }
+function deleteJournal(id){ journals=journals.filter(x=>x.id!==id); localStorage.setItem("catatHitungJournals",JSON.stringify(journals)); renderJournals(); }
+function renderJournals() {
+  let list = document.getElementById("journalList"); if (!journals.length) { list.innerHTML = `<div class="empty">Belum ada jurnal 📔</div>`; return; }
+  list.innerHTML = journals.map(x => `<div class="list-row journal-fold-card"><button type="button" class="journal-fold-button" onclick="toggleJournal(${x.id})" aria-expanded="false"><div class="journal-fold-heading"><div class="journal-fold-info"><div class="journal-fold-title">📔 ${esc(x.title)}</div><div class="muted">${dateID(x.date)}</div></div><span id="journalFoldIcon-${x.id}" class="journal-fold-icon">▶</span></div></button><div id="journalDetails-${x.id}" class="journal-fold-details hidden"><p>${esc(x.text).replace(/\n/g,"<br>")}</p><button type="button" class="delete" onclick="deleteJournal(${x.id})">🗑️</button></div></div>`).join("");
+}
+function toggleJournal(id) { let details = document.getElementById("journalDetails-" + id), icon = document.getElementById("journalFoldIcon-" + id); if (!details) return; details.classList.toggle("hidden"); let isOpen = !details.classList.contains("hidden"); if (icon) { icon.textContent = isOpen ? "▼" : "▶"; } let button = icon ? icon.closest(".journal-fold-button") : null; if (button) { button.setAttribute("aria-expanded", String(isOpen)); } }
+
+/* =========================================
+   INISIALISASI & SISTEM
+   ========================================= */
+let now = new Date(), todayStr = todayISO();
+document.getElementById("financeDate").value = todayStr; document.getElementById("cashDate").value = todayStr; document.getElementById("journalDate").value = todayStr;
+let hematStartDefault = document.getElementById("hematStartDate"), hematEndDefault = document.getElementById("hematEndDate");
+if (hematStartDefault) hematStartDefault.value = todayStr;
+if (hematEndDefault) {
+  let dEnd = new Date(); dEnd.setDate(dEnd.getDate() + 30);
+  hematEndDefault.value = dEnd.getFullYear() + "-" + String(dEnd.getMonth() + 1).padStart(2, "0") + "-" + String(dEnd.getDate()).padStart(2, "0");
+}
+
+(function resetHematFolds() {
+  const inputBody = document.getElementById("hematInputBody"), inputIcon = document.getElementById("hematInputIcon");
+  if (inputBody) inputBody.style.display = "none"; if (inputIcon) inputIcon.textContent = "▶";
+  const expBody = document.getElementById("hematExpenseBody"), expIcon = document.getElementById("hematExpenseIcon");
+  if (expBody) expBody.style.display = "block"; if (expIcon) expIcon.textContent = "▼";
+  const todayBody = document.getElementById("hematTodayBody"), todayIcon = document.getElementById("hematTodayIcon");
+  if (todayBody) todayBody.style.display = "none"; if (todayIcon) todayIcon.textContent = "▶";
+  const histBody = document.getElementById("hematHistoryBody"), histIcon = document.getElementById("hematHistoryIcon");
+  if (histBody) histBody.style.display = "none"; if (histIcon) histIcon.textContent = "▶";
+  const hematExpanded = document.getElementById("hematExpandedView"), hematCollapsed = document.getElementById("hematCollapsedView"), hematToggle = document.getElementById("hematResultToggleIcon");
+  if (hematExpanded) hematExpanded.classList.add("hidden"); if (hematCollapsed) hematCollapsed.classList.remove("hidden"); if (hematToggle) hematToggle.textContent = "▶";
+})();
+
+renderTransactions(); renderGoals(); renderJournals(); renderCash();
+if (typeof renderHemat === "function") renderHemat();
+
+(function markReady() {
+  if (!document.querySelector(".page.active")) { let home = document.getElementById("home"); if (home) home.classList.add("active"); }
+  let nav = document.querySelector(".bottom-nav"); if (nav) nav.classList.add("ready");
+  requestAnimationFrame(function () { document.body.classList.remove("app-loading"); });
+})();
+
+(function() {
+  const nav = document.querySelector(".bottom-nav"); if (!nav) return;
+  function updateNav() { const el = document.activeElement; const isTyping = el && (el.matches("input, textarea") || el.isContentEditable); nav.classList.toggle("keyboard-open", !!isTyping); }
+  document.addEventListener("focusin", updateNav);
+  document.addEventListener("focusout", function() { setTimeout(updateNav, 300); });
+})();
+
+(function() {
+  let backPressedOnce = false;
+  history.pushState({ page: "home" }, "", location.href);
+  window.addEventListener("popstate", function() {
+    let activePage = document.querySelector(".page.active"), pageId = activePage ? activePage.id : "home";
+    if (pageId !== "home") {
+      if (typeof stopPercentDrawSound === "function") stopPercentDrawSound();
+      showPage("home"); history.pushState({ page: "home" }, "", location.href); return;
+    }
+    if (!backPressedOnce) {
+      backPressedOnce = true; alert("Tekan tombol Back sekali lagi untuk keluar dari aplikasi.");
+      history.pushState({ page: "home" }, "", location.href);
+      setTimeout(function() { backPressedOnce = false; }, 2000);
+    } else { history.back(); }
+  });
+})();
+
+(function() {
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', function(e) { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    let touchEndX = e.changedTouches[0].screenX, touchEndY = e.changedTouches[0].screenY;
+    const swipeDistanceX = touchEndX - touchStartX, swipeDistanceY = touchEndY - touchStartY;
+    if (Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY) && Math.abs(swipeDistanceX) > 100) {
+      let activePage = document.querySelector(".page.active"); if (!activePage) return;
+      let pageId = activePage.id;
+      if (pageId === "split" && !document.getElementById("splitDetailView").classList.contains("hidden")) { closeSplitMode(); return; }
+      if (pageId !== "home") {
+        showPage("home"); document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        let homeBtn = document.querySelector('.nav-btn[onclick*="home"]'); if(homeBtn) homeBtn.classList.add("active");
+      }
+    }
+  }, { passive: true });
+})();
+
+/* =========================================
+   SWIPE HINT TOAST — Muncul sekali seumur hidup
+   ========================================= */
+(function initSwipeHint() {
+  const HINT_KEY = "catatHitungSwipeHintShown";
+  const hintEl = document.getElementById("swipeHint");
+  if (!hintEl) return;
+
+  let hintTimeout = null;
+
+  function showSwipeHint() {
+    if (!hintEl) return;
+    hintEl.classList.add("show");
+    clearTimeout(hintTimeout);
+    hintTimeout = setTimeout(hideSwipeHint, 4500);
+  }
+
+  function hideSwipeHint() {
+    if (!hintEl) return;
+    hintEl.classList.remove("show");
+    clearTimeout(hintTimeout);
+  }
+
+  function hasShownHint() {
+    try {
+      return localStorage.getItem(HINT_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markHintShown() {
+    try {
+      localStorage.setItem(HINT_KEY, "1");
+    } catch (e) { /* localStorage penuh / diblokir */ }
+  }
+
+  function attachFirstTapListener() {
+    if (hasShownHint()) return;
+
+    function onFirstTap(e) {
+      const target = e.target.closest(".menu, .nav-btn, .cash-ticket");
+      if (!target) return;
+
+      showSwipeHint();
+      markHintShown();
+
+      document.removeEventListener("click", onFirstTap, true);
+    }
+
+    document.addEventListener("click", onFirstTap, true);
+  }
+
+  let touchStartX = 0;
+  document.addEventListener("touchstart", function (e) {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", function (e) {
+    if (!hintEl.classList.contains("show")) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    if (dx > 30) hideSwipeHint();
+  }, { passive: true });
+
+  document.addEventListener("click", function (e) {
+    if (!hintEl.classList.contains("show")) return;
+    if (hintEl.contains(e.target)) return;
+    if (e.target.closest(".menu, .nav-btn, .cash-ticket")) return;
+    hideSwipeHint();
+  }, true);
+
+  attachFirstTapListener();
+})();
+
+/* BACKUP & RESTORE */
+function exportData() {
+  try {
+    const data = {}, keys = ["catatHitungTransactions", "catatHitungCash", "catatHitungGoals", "catatHitungJournals", "catatHitungHematActive", "catatHitungHematHistory", "catatHitungSplitHistory", "catatHitungSwipeHintShown"];
+    keys.forEach(key => { const val = localStorage.getItem(key); if (val !== null) data[key] = val; });
+    if (Object.keys(data).length === 0) { alert("Belum ada data untuk di-backup."); return; }
+    const dataStr = JSON.stringify(data, null, 2), blob = new Blob([dataStr], { type: "application/json" }), url = URL.createObjectURL(blob);
+    const a = document.createElement("a"), date = new Date().toISOString().slice(0, 10);
+    a.href = url; a.download = `Backup_CatatHitung_${date}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    alert("✅ Backup berhasil diunduh!\nSimpan file JSON ini di tempat yang aman.");
+  } catch (e) { alert("❌ Gagal melakukan backup: " + e.message); }
+}
+function importData(event) {
+  const file = event.target.files[0]; if (!file) return;
+  if (!confirm("⚠️ PERINGATAN ⚠️\n\nSemua data saat ini akan DITIMPA dengan data dari file backup.\n\nApakah Anda yakin ingin melanjutkan?")) { event.target.value = ""; return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (typeof data !== 'object' || data === null) throw new Error("Format file tidak valid.");
+      let count = 0;
+      for (const key in data) { if (data.hasOwnProperty(key)) { localStorage.setItem(key, data[key]); count++; } }
+      if (count === 0) throw new Error("Tidak ada data yang ditemukan di dalam file.");
+      alert("✅ Restore berhasil! Halaman akan dimuat ulang untuk menerapkan data baru."); location.reload();
+    } catch (err) { alert("❌ Gagal melakukan restore:\n" + err.message); }
+  };
+  reader.readAsText(file); event.target.value = "";
+}
+</script>
+</body>
+</html>

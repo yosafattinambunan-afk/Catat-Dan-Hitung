@@ -1,0 +1,20 @@
+# Rahasia penandatanganan aplikasi
+*.jks
+*.keystore
+keystore.properties
+key.properties
+
+# Rahasia lingkungan
+.env
+.env.*
+
+# Dependensi dan hasil build
+node_modules/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# Sistem operasi
+.DS_Store
+Thumbs.db
